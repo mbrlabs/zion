@@ -2,7 +2,6 @@ package main
 
 import (
 	"hodor"
-	"net/http"
 	"fmt"
 )
 
@@ -19,8 +18,8 @@ func main() {
 	mw := new(Middleware1)
 	app.MountBefore("", mw)
 
-	app.Get("/test/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "It works!")
+	app.Get("/test/", func(ctx *hodor.Context) {
+		fmt.Fprintf(ctx.Writer, "It works!")
 	})
 
 	app.Start()

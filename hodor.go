@@ -15,7 +15,7 @@ type Hodor struct {
 func NewHodor() *Hodor {
 	return &Hodor {
 		server: http.Server {Addr: "127.0.0.1:3000"},
-		router: NewRouter(),
+		router: &Router{},
 	}
 }
 
@@ -27,8 +27,8 @@ func (h *Hodor) MountBefore(pattern string, middleware Middleware) {
 	h.router.mountBefore(pattern, middleware)
 }
 
-func (h *Hodor) Get(pattern string, handler func(http.ResponseWriter, *http.Request)) {
-	h.router.addRoute(pattern, handler)
+func (h *Hodor) Get(pattern string, handler func(ctx *Context)) {
+	h.router.addRoute(pattern, "GET", handler)
 }
 
 func (h *Hodor) Start() {
