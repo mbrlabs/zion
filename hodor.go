@@ -19,9 +19,12 @@ func NewHodor() *Hodor {
 	}
 }
 
-// Adds a middleware
-func (h *Hodor) Use(handler func(http.ResponseWriter, *http.Request)) {
-	h.router.use(handler)
+func (h *Hodor) MountAfter(pattern string, middleware Middleware) {
+	h.router.mountAfter(pattern, middleware)
+}
+
+func (h *Hodor) MountBefore(pattern string, middleware Middleware) {
+	h.router.mountBefore(pattern, middleware)
 }
 
 func (h *Hodor) Get(pattern string, handler func(http.ResponseWriter, *http.Request)) {
@@ -29,7 +32,7 @@ func (h *Hodor) Get(pattern string, handler func(http.ResponseWriter, *http.Requ
 }
 
 func (h *Hodor) Start() {
-	fmt.Println("Starting server...")
+	fmt.Println("Listening on http://localhost:3000")
 
 	h.server.Handler = *h.router
 	h.server.ListenAndServe()

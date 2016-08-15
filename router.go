@@ -7,7 +7,8 @@ import (
 
 type Router struct {
 	routes 	map[string]func(http.ResponseWriter, *http.Request)
-	middleware	[]func(http.ResponseWriter, *http.Request)
+	after	[]Middleware
+	before	[]Middleware
 }
 
 type Route struct {
@@ -22,9 +23,14 @@ func NewRouter() *Router {
 	}
 }
 
-func (r *Router) use(handler func(http.ResponseWriter, *http.Request)) {
-	r.middleware = append(r.middleware, handler)
-	fmt.Printf("Added middleware %d\n", len(r.middleware))
+func (r *Router) mountAfter(pattern string, middleware Middleware) {
+	r.after = append(r.after, middleware)
+	fmt.Printf("Added middleware %d\n", len(r.after))
+}
+
+func (r *Router) mountBefore(pattern string, middleware Middleware) {
+	r.before = append(r.before, middleware)
+	fmt.Printf("Added middleware %d\n", len(r.before))
 }
 
 func (r *Router) addRoute(pattern string, handler func(http.ResponseWriter, *http.Request)) {
@@ -32,15 +38,25 @@ func (r *Router) addRoute(pattern string, handler func(http.ResponseWriter, *htt
 }
 
 func (r Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {	
+	ctx := &Context{Writer: resp, Request: req}
+
 	handler := r.routes[req.URL.Path]
 	if handler == nil {
 		// we didn't find a handler -> send a 404
 		http.NotFound(resp, req)
 	} else {
-		// we found a matching handler -> go through middleware and then call the handler
-		for _, mw := range r.middleware {
-			mw(resp, req)
+
+		// before middleware
+		for _, mw := range r.before {
+			mw.Execute(ctx)
 		}
+
+		// actual route
 		handler(resp, req)
+
+		// after middleware
+		for _, mw := range r.after {
+			mw.Execute(ctx)
+		}
 	}
 }

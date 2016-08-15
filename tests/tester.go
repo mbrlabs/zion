@@ -6,21 +6,22 @@ import (
 	"fmt"
 )
 
-func main() {
-	hodor := hodor.NewHodor()
-	hodor.Use(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("running middleware 1")
-	})
-	hodor.Use(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("running middleware 2")
-	})
-	hodor.Use(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("running middleware 3")
-	})
+type Middleware1 struct {
 
-	hodor.Get("/test/", func(w http.ResponseWriter, r *http.Request) {
+} 
+
+func (m *Middleware1) Execute(ctx *hodor.Context) {
+	fmt.Println("executing middleware 1")
+} 
+
+func main() {
+	app := hodor.NewHodor()
+	mw := new(Middleware1)
+	app.MountBefore("", mw)
+
+	app.Get("/test/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "It works!")
 	})
 
-	hodor.Start()
+	app.Start()
 }
