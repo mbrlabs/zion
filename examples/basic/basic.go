@@ -8,7 +8,7 @@ import (
 type TestMiddleware struct {} 
 
 func (m *TestMiddleware) Execute(ctx *hodor.Context) bool {
-	fmt.Println("executing TestMiddleware")
+	fmt.Printf("Executing %s\n", m.Name())
 	return true
 } 
 
