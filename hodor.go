@@ -1,20 +1,20 @@
 package hodor
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 )
 
 type Hodor struct {
-	server 				http.Server
-	router 				*Router
+	server http.Server
+	router *Router
 }
 
 // Returns a new Hodor instance
 //
 func NewHodor() *Hodor {
-	return &Hodor {
-		server: http.Server {Addr: "127.0.0.1:3000"},
+	return &Hodor{
+		server: http.Server{Addr: "127.0.0.1:3000"},
 		router: &Router{},
 	}
 }

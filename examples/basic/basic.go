@@ -1,20 +1,20 @@
 package main
 
 import (
-	"hodor"
 	"fmt"
+	"github.com/mbrlabs/hodor"
 )
 
-type TestMiddleware struct {} 
+type TestMiddleware struct{}
 
 func (m *TestMiddleware) Execute(ctx *hodor.Context) bool {
 	fmt.Printf("Executing %s\n", m.Name())
 	return true
-} 
+}
 
 func (m *TestMiddleware) Name() string {
 	return "Test middleware"
-} 
+}
 
 func main() {
 	app := hodor.NewHodor()

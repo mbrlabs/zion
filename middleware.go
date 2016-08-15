@@ -1,6 +1,6 @@
 package hodor
 
 type Middleware interface {
-    Execute(ctx *Context) bool
-    Name() string
+	Execute(ctx *Context) bool
+	Name() string
 }

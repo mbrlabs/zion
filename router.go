@@ -1,9 +1,9 @@
 package hodor
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
-	"fmt"
 )
 
 type HandlerFunc func(ctx *Context)
@@ -12,9 +12,9 @@ type HandlerFunc func(ctx *Context)
 // 								struct Route
 // ============================================================================
 type Route struct {
-    path    string
-    Method  string
-    Handler HandlerFunc
+	path    string
+	Method  string
+	Handler HandlerFunc
 }
 
 func NewRoute(pattern string, method string, handler HandlerFunc) Route {
@@ -29,16 +29,15 @@ func (r *Route) SetPath(pattern string) {
 
 func (r *Route) GetPath() string {
 	return r.path
-} 
-
+}
 
 // ============================================================================
 // 								struct Router
 // ============================================================================
 type Router struct {
-	routes 	[]Route
-	after	[]Middleware
-	before	[]Middleware
+	routes []Route
+	after  []Middleware
+	before []Middleware
 }
 
 func (r *Router) mountAfter(pattern string, middleware Middleware) {
