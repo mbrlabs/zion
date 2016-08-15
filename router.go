@@ -19,12 +19,12 @@ type Route struct {
 
 func (r *Router) mountAfter(pattern string, middleware Middleware) {
 	r.after = append(r.after, middleware)
-	fmt.Printf("Added middleware %d\n", len(r.after))
+	fmt.Printf("mountAfter: %s\n", middleware.Name())
 }
 
 func (r *Router) mountBefore(pattern string, middleware Middleware) {
 	r.before = append(r.before, middleware)
-	fmt.Printf("Added middleware %d\n", len(r.before))
+	fmt.Printf("mountBefore: %s\n", middleware.Name())
 }
 
 func (r *Router) addRoute(pattern string, method string, handler func(ctx *Context)) {
@@ -52,7 +52,9 @@ func (r Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 
 		// before middleware
 		for _, mw := range r.before {
-			mw.Execute(ctx)
+			if !mw.Execute(ctx) {
+				return
+			}
 		}
 
 		// actual route
@@ -60,7 +62,9 @@ func (r Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 
 		// after middleware
 		for _, mw := range r.after {
-			mw.Execute(ctx)
+			if !mw.Execute(ctx) {
+				return
+			}		
 		}
 	}
 }
