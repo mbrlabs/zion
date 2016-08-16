@@ -1,7 +1,6 @@
 package hodor
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -77,9 +76,53 @@ func (t *RouteTree) InsertRoute(route *Route) {
 
 // Returns a route and sets the url parameters of the context
 func (t *RouteTree) GetRoute(ctx *Context) *Route {
-	path := ctx.Request.URL.Path
-	fmt.Println("GetRoute path: " + path)
+	path := strings.Trim(ctx.Request.URL.Path, "/")
 
-	// TODO implement
-	return nil
+	// deny everything that contains a colon
+	if strings.Contains(path, ":") {
+		return nil
+	}
+
+	// handle root path
+	if path == "" {
+		return t.root.route
+	}
+
+	// handle everything else
+	parts := strings.Split(path, "/")
+	var currentNode *node = t.root
+	var namedParam *node = nil
+	foundPart := false
+	for _, part := range parts {
+		foundPart = false
+		namedParam = nil
+		for _, childNode := range currentNode.nodes {
+			// found a static match
+			if childNode.part == part {
+				currentNode = childNode
+				foundPart = true
+				break
+			}
+			// found a possible match in a named param
+			if strings.Contains(childNode.part, ":") {
+				namedParam = childNode
+			}
+		}
+
+		// found match in named param, since it's set to a non-nil value.
+		// set as current node, extract value and set in context.
+		if namedParam != nil && !foundPart {
+			currentNode = namedParam
+			foundPart = true
+			key := strings.TrimLeft(currentNode.part, ":")
+			ctx.UrlParams[key] = part
+		}
+
+		// if the url part can't be found, the route does not exist
+		if !foundPart {
+			return nil
+		}
+	}
+
+	return currentNode.route
 }

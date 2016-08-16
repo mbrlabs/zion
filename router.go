@@ -60,7 +60,7 @@ func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
 }
 
 func (r Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	ctx := &Context{Writer: resp, Request: req}
+	ctx := NewContext(resp, req)
 	route := r.tree.GetRoute(ctx)
 
 	if route == nil {
