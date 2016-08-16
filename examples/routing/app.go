@@ -22,18 +22,30 @@ func main() {
 	app.MountAfter("", new(TestMiddleware))
 
 	app.Get("/test/:param", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "/test/:param -> %s", ctx.UrlParams["param"])
+		fmt.Fprintf(ctx.Writer, "get => /test/:param -> %s", ctx.UrlParams["param"])
+	})
+
+	app.Delete("/test/:param", func(ctx *hodor.Context) {
+		fmt.Fprintf(ctx.Writer, "delete => /test/:param -> %s", ctx.UrlParams["param"])
 	})
 
 	app.Get("/test/hannah", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "/test/hannah")
+		fmt.Fprintf(ctx.Writer, "get => /test/hannah")
+	})
+
+	app.Post("/test/hannah", func(ctx *hodor.Context) {
+		fmt.Fprintf(ctx.Writer, "post => /test/hannah")
 	})
 
 	app.Get("/test", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "/test")
+		fmt.Fprintf(ctx.Writer, "get => /test")
 	})
 	app.Get("/", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "/")
+		fmt.Fprintf(ctx.Writer, "get => /")
+	})
+
+	app.Post("/", func(ctx *hodor.Context) {
+		fmt.Fprintf(ctx.Writer, "post => /")
 	})
 
 	app.Start()

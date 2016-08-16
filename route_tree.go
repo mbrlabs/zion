@@ -2,6 +2,7 @@ package hodor
 
 import (
 	"strings"
+    "net/http"
 )
 
 // ============================================================================
@@ -36,20 +37,32 @@ func (n *node) nextNode(part string) *node {
 //                              struct RouteTree
 // ============================================================================
 type RouteTree struct {
-	root *node
+    treeRoots map[string]*node
 }
 
 func NewRouteTree() RouteTree {
-	return RouteTree{root: &node{part: "", route: nil}}
+    var roots map[string]*node = make(map[string]*node)
+    roots[http.MethodGet] = &node{part: "", route: nil}
+    roots[http.MethodHead] = &node{part: "", route: nil}
+    roots[http.MethodPost] = &node{part: "", route: nil}
+    roots[http.MethodPut] = &node{part: "", route: nil}
+    roots[http.MethodDelete] = &node{part: "", route: nil}
+    roots[http.MethodOptions] = &node{part: "", route: nil}
+    return RouteTree{treeRoots: roots}
 }
 
 func (t *RouteTree) InsertRoute(route *Route) {
-	parts := strings.Split(route.GetPath(), "/")
+    // get tree root, corresponding to the http method
+    root := t.treeRoots[route.Method]
+    if root == nil { 
+        panic("Unsupported http method: " + route.Method)
+    }
 
+	parts := strings.Split(route.GetPath(), "/")
 	// handle the root pattern ("")
 	if len(parts) == 1 && parts[0] == "" {
-		if t.root.route == nil {
-			t.root.route = route
+		if root.route == nil {
+			root.route = route
 			return
 		} else {
 			panic("Abmigious mapping for the root pattern")
@@ -57,7 +70,7 @@ func (t *RouteTree) InsertRoute(route *Route) {
 	}
 
 	// handle other patterns
-	currentNode := t.root
+	currentNode := root
 	for i, part := range parts {
 		currentNode = currentNode.nextNode(part)
 		// end of pattern reached. we need to assign the route here
@@ -76,6 +89,12 @@ func (t *RouteTree) InsertRoute(route *Route) {
 
 // Returns a route and sets the url parameters of the context
 func (t *RouteTree) GetRoute(ctx *Context) *Route {
+    // get tree root, corresponding to the http method
+    root := t.treeRoots[ctx.Request.Method]
+    if root == nil {
+        return nil
+    }
+
 	path := strings.Trim(ctx.Request.URL.Path, "/")
 
 	// deny everything that contains a colon
@@ -85,12 +104,12 @@ func (t *RouteTree) GetRoute(ctx *Context) *Route {
 
 	// handle root path
 	if path == "" {
-		return t.root.route
+		return root.route
 	}
 
 	// handle everything else
 	parts := strings.Split(path, "/")
-	var currentNode *node = t.root
+	var currentNode *node = root
 	var namedParam *node = nil
 	foundPart := false
 	for _, part := range parts {

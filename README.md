@@ -1,5 +1,5 @@
 # hodor 
-Hodor is an experimental web framework build on top of go's net/http package
+Hodor is an experimental web framework build on top of Go's net/http package
 
 ## Planned features
 - High performance router with named parameters
