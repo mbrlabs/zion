@@ -34,7 +34,7 @@ func (this *node) nextNode(part string) *node {
 }
 
 // ============================================================================
-//                              struct RouteTree
+//                              struct routeTree
 // ============================================================================
 type routeTree struct {
 	treeRoots map[string]*node

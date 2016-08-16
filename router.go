@@ -9,7 +9,7 @@ import (
 type HandlerFunc func(ctx *Context)
 
 // ============================================================================
-// 								struct Route
+// 								struct route
 // ============================================================================
 type route struct {
 	pattern string
@@ -17,8 +17,8 @@ type route struct {
 	handler HandlerFunc
 }
 
-func newRoute(pattern string, method string, handler HandlerFunc) route {
-	r := route{method: method, handler: handler}
+func newRoute(pattern string, method string, handler HandlerFunc) *route {
+	r := &route{method: method, handler: handler}
 	r.setPattern(pattern)
 	return r
 }
@@ -55,8 +55,7 @@ func (this *Router) mountBefore(pattern string, middleware Middleware) {
 }
 
 func (this *Router) addRoute(pattern string, method string, handler HandlerFunc) {
-	route := newRoute(pattern, method, handler)
-	this.tree.insert(&route)
+	this.tree.insert(newRoute(pattern, method, handler))
 }
 
 func (this Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
