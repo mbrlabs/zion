@@ -46,6 +46,7 @@ func (h *Hodor) configServer() {
 	h.server.Addr = h.Host + ":" + strconv.Itoa(h.Port)
 	h.server.ReadTimeout = h.ReadTimeout
 	h.server.WriteTimeout = h.WriteTimeout
+	h.server.Handler = h.router
 }
 
 func (h *Hodor) Start() {

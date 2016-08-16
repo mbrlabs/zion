@@ -1,6 +1,7 @@
 package hodor
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -74,7 +75,11 @@ func (t *RouteTree) InsertRoute(route *Route) {
 	panic("Something went terribly wrong while mapping the route: " + route.path)
 }
 
-func (t *RouteTree) GetRoute(pattern string) *Route {
+// Returns a route and sets the url parameters of the context
+func (t *RouteTree) GetRoute(ctx *Context) *Route {
+	path := ctx.Request.URL.Path
+	fmt.Println("GetRoute path: " + path)
+
 	// TODO implement
 	return nil
 }

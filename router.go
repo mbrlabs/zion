@@ -35,8 +35,7 @@ func (r *Route) GetPath() string {
 // 								struct Router
 // ============================================================================
 type Router struct {
-	tree RouteTree
-	// routes []Route
+	tree   RouteTree
 	after  []Middleware
 	before []Middleware
 }
@@ -62,8 +61,8 @@ func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
 
 func (r Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	ctx := &Context{Writer: resp, Request: req}
+	route := r.tree.GetRoute(ctx)
 
-	route := r.tree.GetRoute(req.URL.Path)
 	if route == nil {
 		// we didn't find a handler -> send a 404
 		http.NotFound(resp, req)
