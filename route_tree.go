@@ -1,8 +1,8 @@
 package hodor
 
 import (
+	"net/http"
 	"strings"
-    "net/http"
 )
 
 // ============================================================================
@@ -37,26 +37,26 @@ func (n *node) nextNode(part string) *node {
 //                              struct RouteTree
 // ============================================================================
 type RouteTree struct {
-    treeRoots map[string]*node
+	treeRoots map[string]*node
 }
 
 func NewRouteTree() RouteTree {
-    var roots map[string]*node = make(map[string]*node)
-    roots[http.MethodGet] = &node{part: "", route: nil}
-    roots[http.MethodHead] = &node{part: "", route: nil}
-    roots[http.MethodPost] = &node{part: "", route: nil}
-    roots[http.MethodPut] = &node{part: "", route: nil}
-    roots[http.MethodDelete] = &node{part: "", route: nil}
-    roots[http.MethodOptions] = &node{part: "", route: nil}
-    return RouteTree{treeRoots: roots}
+	var roots map[string]*node = make(map[string]*node)
+	roots[http.MethodGet] = &node{part: "", route: nil}
+	roots[http.MethodHead] = &node{part: "", route: nil}
+	roots[http.MethodPost] = &node{part: "", route: nil}
+	roots[http.MethodPut] = &node{part: "", route: nil}
+	roots[http.MethodDelete] = &node{part: "", route: nil}
+	roots[http.MethodOptions] = &node{part: "", route: nil}
+	return RouteTree{treeRoots: roots}
 }
 
 func (t *RouteTree) InsertRoute(route *Route) {
-    // get tree root, corresponding to the http method
-    root := t.treeRoots[route.Method]
-    if root == nil { 
-        panic("Unsupported http method: " + route.Method)
-    }
+	// get tree root, corresponding to the http method
+	root := t.treeRoots[route.Method]
+	if root == nil {
+		panic("Unsupported http method: " + route.Method)
+	}
 
 	parts := strings.Split(route.GetPath(), "/")
 	// handle the root pattern ("")
@@ -89,11 +89,11 @@ func (t *RouteTree) InsertRoute(route *Route) {
 
 // Returns a route and sets the url parameters of the context
 func (t *RouteTree) GetRoute(ctx *Context) *Route {
-    // get tree root, corresponding to the http method
-    root := t.treeRoots[ctx.Request.Method]
-    if root == nil {
-        return nil
-    }
+	// get tree root, corresponding to the http method
+	root := t.treeRoots[ctx.Request.Method]
+	if root == nil {
+		return nil
+	}
 
 	path := strings.Trim(ctx.Request.URL.Path, "/")
 

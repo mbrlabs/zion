@@ -54,24 +54,12 @@ func (h *Hodor) Put(pattern string, handler HandlerFunc) {
 	h.router.addRoute(pattern, http.MethodPut, handler)
 }
 
-func (h *Hodor) Patch(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodPatch, handler)
-}
-
 func (h *Hodor) Delete(pattern string, handler HandlerFunc) {
 	h.router.addRoute(pattern, http.MethodDelete, handler)
 }
 
-func (h *Hodor) Connect(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodConnect, handler)
-}
-
 func (h *Hodor) Options(pattern string, handler HandlerFunc) {
 	h.router.addRoute(pattern, http.MethodOptions, handler)
-}
-
-func (h *Hodor) Trace(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodTrace, handler)
 }
 
 func (h *Hodor) configServer() {
