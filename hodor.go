@@ -3,9 +3,16 @@ package hodor
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 type Hodor struct {
+	Host         string
+	Port         int
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+
 	server http.Server
 	router *Router
 }
@@ -13,10 +20,14 @@ type Hodor struct {
 // Returns a new Hodor instance
 //
 func NewHodor() *Hodor {
-	return &Hodor{
-		server: http.Server{Addr: "127.0.0.1:3000"},
-		router: &Router{},
+	app := &Hodor{
+		Port:         3000,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		router:       &Router{},
 	}
+
+	return app
 }
 
 func (h *Hodor) MountAfter(pattern string, middleware Middleware) {
@@ -31,9 +42,15 @@ func (h *Hodor) Get(pattern string, handler func(ctx *Context)) {
 	h.router.addRoute(pattern, "GET", handler)
 }
 
+func (h *Hodor) configServer() {
+	h.server.Addr = h.Host + ":" + strconv.Itoa(h.Port)
+	h.server.ReadTimeout = h.ReadTimeout
+	h.server.WriteTimeout = h.WriteTimeout
+}
+
 func (h *Hodor) Start() {
 	fmt.Println("Listening on http://localhost:3000")
 
-	h.server.Handler = *h.router
+	h.configServer()
 	h.server.ListenAndServe()
 }

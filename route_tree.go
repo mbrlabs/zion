@@ -10,6 +10,7 @@ import (
 type node struct {
 	part  string
 	route *Route
+	nodes []*node
 }
 
 // ============================================================================
@@ -19,10 +20,18 @@ type RouteTree struct {
 	root *node
 }
 
+func NewRouteTree() *RouteTree {
+	return &RouteTree{root: &node{part: "", route: nil}}
+}
+
 func (t *RouteTree) InsertRoute(route *Route) {
 	parts := strings.Split(route.GetPath(), "/")
-	if len(parts) == 0 {
 
+	currentNode := t.root
+	for _, part := range parts {
+		if currentNode.part == part {
+
+		}
 	}
 
 	// TODO implement
