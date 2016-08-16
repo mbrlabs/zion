@@ -30,48 +30,48 @@ func NewHodor() *Hodor {
 	return app
 }
 
-func (h *Hodor) MountAfter(pattern string, middleware Middleware) {
-	h.router.mountAfter(pattern, middleware)
+func (this *Hodor) MountAfter(pattern string, middleware Middleware) {
+	this.router.mountAfter(pattern, middleware)
 }
 
-func (h *Hodor) MountBefore(pattern string, middleware Middleware) {
-	h.router.mountBefore(pattern, middleware)
+func (this *Hodor) MountBefore(pattern string, middleware Middleware) {
+	this.router.mountBefore(pattern, middleware)
 }
 
-func (h *Hodor) Get(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodGet, handler)
+func (this *Hodor) Get(pattern string, handler HandlerFunc) {
+	this.router.addRoute(pattern, http.MethodGet, handler)
 }
 
-func (h *Hodor) Head(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodHead, handler)
+func (this *Hodor) Head(pattern string, handler HandlerFunc) {
+	this.router.addRoute(pattern, http.MethodHead, handler)
 }
 
-func (h *Hodor) Post(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodPost, handler)
+func (this *Hodor) Post(pattern string, handler HandlerFunc) {
+	this.router.addRoute(pattern, http.MethodPost, handler)
 }
 
-func (h *Hodor) Put(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodPut, handler)
+func (this *Hodor) Put(pattern string, handler HandlerFunc) {
+	this.router.addRoute(pattern, http.MethodPut, handler)
 }
 
-func (h *Hodor) Delete(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodDelete, handler)
+func (this *Hodor) Delete(pattern string, handler HandlerFunc) {
+	this.router.addRoute(pattern, http.MethodDelete, handler)
 }
 
-func (h *Hodor) Options(pattern string, handler HandlerFunc) {
-	h.router.addRoute(pattern, http.MethodOptions, handler)
+func (this *Hodor) Options(pattern string, handler HandlerFunc) {
+	this.router.addRoute(pattern, http.MethodOptions, handler)
 }
 
-func (h *Hodor) configServer() {
-	h.server.Addr = h.Host + ":" + strconv.Itoa(h.Port)
-	h.server.ReadTimeout = h.ReadTimeout
-	h.server.WriteTimeout = h.WriteTimeout
-	h.server.Handler = h.router
+func (this *Hodor) configServer() {
+	this.server.Addr = this.Host + ":" + strconv.Itoa(this.Port)
+	this.server.ReadTimeout = this.ReadTimeout
+	this.server.WriteTimeout = this.WriteTimeout
+	this.server.Handler = this.router
 }
 
-func (h *Hodor) Start() {
+func (this *Hodor) Start() {
 	fmt.Println("Listening on http://localhost:3000")
 
-	h.configServer()
-	h.server.ListenAndServe()
+	this.configServer()
+	this.server.ListenAndServe()
 }

@@ -10,13 +10,13 @@ import (
 // ============================================================================
 type node struct {
 	part  string
-	route *Route
+	route *route
 	nodes []*node
 }
 
-func (n *node) nextNode(part string) *node {
+func (this *node) nextNode(part string) *node {
 	isParam := strings.HasPrefix(part, ":")
-	for _, childNode := range n.nodes {
+	for _, childNode := range this.nodes {
 		// panic if a different named parameter is added to a list of child nodes, which already
 		// have another named parameter
 		if strings.HasPrefix(childNode.part, ":") && isParam && childNode.part != part {
@@ -29,18 +29,18 @@ func (n *node) nextNode(part string) *node {
 	}
 
 	newNode := &node{part: part, route: nil}
-	n.nodes = append(n.nodes, newNode)
+	this.nodes = append(this.nodes, newNode)
 	return newNode
 }
 
 // ============================================================================
 //                              struct RouteTree
 // ============================================================================
-type RouteTree struct {
+type routeTree struct {
 	treeRoots map[string]*node
 }
 
-func NewRouteTree() RouteTree {
+func newRouteTree() routeTree {
 	var roots map[string]*node = make(map[string]*node)
 	roots[http.MethodGet] = &node{part: "", route: nil}
 	roots[http.MethodHead] = &node{part: "", route: nil}
@@ -48,21 +48,21 @@ func NewRouteTree() RouteTree {
 	roots[http.MethodPut] = &node{part: "", route: nil}
 	roots[http.MethodDelete] = &node{part: "", route: nil}
 	roots[http.MethodOptions] = &node{part: "", route: nil}
-	return RouteTree{treeRoots: roots}
+	return routeTree{treeRoots: roots}
 }
 
-func (t *RouteTree) InsertRoute(route *Route) {
+func (this *routeTree) insert(r *route) {
 	// get tree root, corresponding to the http method
-	root := t.treeRoots[route.Method]
+	root := this.treeRoots[r.method]
 	if root == nil {
-		panic("Unsupported http method: " + route.Method)
+		panic("Unsupported http method: " + r.method)
 	}
 
-	parts := strings.Split(route.GetPath(), "/")
+	parts := strings.Split(r.getPattern(), "/")
 	// handle the root pattern ("")
 	if len(parts) == 1 && parts[0] == "" {
 		if root.route == nil {
-			root.route = route
+			root.route = r
 			return
 		} else {
 			panic("Abmigious mapping for the root pattern")
@@ -76,21 +76,21 @@ func (t *RouteTree) InsertRoute(route *Route) {
 		// end of pattern reached. we need to assign the route here
 		if i == len(parts)-1 {
 			if currentNode.route == nil {
-				currentNode.route = route
+				currentNode.route = r
 				return
 			} else {
-				panic("Abmigious mapping for: " + route.path)
+				panic("Abmigious mapping for: " + r.pattern)
 			}
 		}
 	}
 
-	panic("Something went terribly wrong while mapping the route: " + route.path)
+	panic("Something went terribly wrong while mapping the route: " + r.pattern)
 }
 
 // Returns a route and sets the url parameters of the context
-func (t *RouteTree) GetRoute(ctx *Context) *Route {
+func (this *routeTree) get(ctx *Context) *route {
 	// get tree root, corresponding to the http method
-	root := t.treeRoots[ctx.Request.Method]
+	root := this.treeRoots[ctx.Request.Method]
 	if root == nil {
 		return nil
 	}
