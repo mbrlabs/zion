@@ -21,7 +21,14 @@ func main() {
 	app.MountBefore("", new(TestMiddleware))
 	app.MountAfter("", new(TestMiddleware))
 
-	app.Get("/test/", func(ctx *hodor.Context) {
+	app.Get("/test/:param", func(ctx *hodor.Context) {
+		fmt.Fprintf(ctx.Writer, "It works!")
+	})
+
+	app.Get("/test", func(ctx *hodor.Context) {
+		fmt.Fprintf(ctx.Writer, "It works!")
+	})
+	app.Get("/", func(ctx *hodor.Context) {
 		fmt.Fprintf(ctx.Writer, "It works!")
 	})
 

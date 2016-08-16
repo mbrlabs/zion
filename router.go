@@ -35,9 +35,14 @@ func (r *Route) GetPath() string {
 // 								struct Router
 // ============================================================================
 type Router struct {
-	routes []Route
+	tree RouteTree
+	// routes []Route
 	after  []Middleware
 	before []Middleware
+}
+
+func NewRouter() *Router {
+	return &Router{tree: NewRouteTree()}
 }
 
 func (r *Router) mountAfter(pattern string, middleware Middleware) {
@@ -51,25 +56,14 @@ func (r *Router) mountBefore(pattern string, middleware Middleware) {
 }
 
 func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
-	r.routes = append(r.routes, NewRoute(pattern, method, handler))
-}
-
-// TODO replace this with the suffix tree implementation
-func (r *Router) findRoute(pattern string) *Route {
-	pattern = strings.Trim(pattern, "/")
-	for _, route := range r.routes {
-		if route.GetPath() == pattern {
-			return &route
-		}
-	}
-
-	return nil
+	newRoute := NewRoute(pattern, method, handler)
+	r.tree.InsertRoute(&newRoute)
 }
 
 func (r Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	ctx := &Context{Writer: resp, Request: req}
 
-	route := r.findRoute(req.URL.Path)
+	route := r.tree.GetRoute(req.URL.Path)
 	if route == nil {
 		// we didn't find a handler -> send a 404
 		http.NotFound(resp, req)

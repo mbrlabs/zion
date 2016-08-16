@@ -24,7 +24,7 @@ func NewHodor() *Hodor {
 		Port:         3000,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		router:       &Router{},
+		router:       NewRouter(),
 	}
 
 	return app
