@@ -1,6 +1,7 @@
 package hodor
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -139,14 +140,15 @@ func (rt *routeTree) get(ctx *Context) *route {
 	currentNode := root
 	var namedParam *node
 	foundPart := false
-	for _, part := range parts {
+	for partIndex, part := range parts {
 		foundPart = false
 		namedParam = nil
 		for _, childNode := range currentNode.nodes {
 			// found a wildcard match
 			if childNode.isWildcard() {
-				key := strings.TrimLeft(currentNode.part, "*")
-				ctx.UrlParams[key] = part
+				key := strings.TrimLeft(childNode.part, "*")
+				ctx.UrlParams[key] = strings.Join(parts[partIndex:], "/")
+				fmt.Printf("[%s]: %s", key, part)
 				return childNode.route
 			}
 			// found a static match

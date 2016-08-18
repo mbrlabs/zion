@@ -45,7 +45,7 @@ func main() {
 	})
 
 	app.Get("/static/*path", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "get => /static/*path")
+		fmt.Fprintf(ctx.Writer, "get => /static/*path -> %s", ctx.UrlParams["path"])
 	})
 
 	app.Post("/", func(ctx *hodor.Context) {
