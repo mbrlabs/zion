@@ -23,12 +23,12 @@ func newRoute(pattern string, method string, handler HandlerFunc) *route {
 	return r
 }
 
-func (this *route) setPattern(pattern string) {
-	this.pattern = strings.Trim(pattern, "/")
+func (r *route) setPattern(pattern string) {
+	r.pattern = strings.Trim(pattern, "/")
 }
 
-func (this *route) getPattern() string {
-	return this.pattern
+func (r *route) getPattern() string {
+	return r.pattern
 }
 
 // ============================================================================
@@ -44,30 +44,30 @@ func NewRouter() *Router {
 	return &Router{tree: newRouteTree()}
 }
 
-func (this *Router) mountAfter(pattern string, middleware Middleware) {
-	this.after = append(this.after, middleware)
+func (r *Router) mountAfter(pattern string, middleware Middleware) {
+	r.after = append(r.after, middleware)
 	fmt.Printf("mountAfter: %s\n", middleware.Name())
 }
 
-func (this *Router) mountBefore(pattern string, middleware Middleware) {
-	this.before = append(this.before, middleware)
+func (r *Router) mountBefore(pattern string, middleware Middleware) {
+	r.before = append(r.before, middleware)
 	fmt.Printf("mountBefore: %s\n", middleware.Name())
 }
 
-func (this *Router) addRoute(pattern string, method string, handler HandlerFunc) {
-	this.tree.insert(newRoute(pattern, method, handler))
+func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
+	r.tree.insert(newRoute(pattern, method, handler))
 }
 
-func (this Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (r Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	ctx := NewContext(resp, req)
-	route := this.tree.get(ctx)
+	route := r.tree.get(ctx)
 
 	if route == nil {
 		// we didn't find a handler -> send a 404
 		http.NotFound(resp, req)
 	} else {
 		// before middleware
-		for _, mw := range this.before {
+		for _, mw := range r.before {
 			if !mw.Execute(ctx) {
 				return
 			}
@@ -75,7 +75,7 @@ func (this Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		// actual route
 		route.handler(ctx)
 		// after middleware
-		for _, mw := range this.after {
+		for _, mw := range r.after {
 			if !mw.Execute(ctx) {
 				return
 			}

@@ -14,12 +14,12 @@ type node struct {
 	nodes []*node
 }
 
-func (this *node) nextNode(part string) *node {
+func (n *node) nextNode(part string) *node {
 	isParam := strings.HasPrefix(part, ":")
-	for _, childNode := range this.nodes {
+	for _, childNode := range n.nodes {
 		// panic if a different named parameter is added to a list of child nodes, which already
 		// have another named parameter
-		if strings.HasPrefix(childNode.part, ":") && isParam && childNode.part != part {
+		if childNode.isParam() && isParam && childNode.part != part {
 			panic("Ambigious mapping of named parameters found.")
 		}
 
@@ -29,8 +29,16 @@ func (this *node) nextNode(part string) *node {
 	}
 
 	newNode := &node{part: part, route: nil}
-	this.nodes = append(this.nodes, newNode)
+	n.nodes = append(n.nodes, newNode)
 	return newNode
+}
+
+func (n *node) isParam() bool {
+	return strings.HasPrefix(n.part, ":")
+}
+
+func (n *node) isWildcard() bool {
+	return strings.HasPrefix(n.part, "*")
 }
 
 // ============================================================================
@@ -51,9 +59,9 @@ func newRouteTree() routeTree {
 	return routeTree{treeRoots: roots}
 }
 
-func (this *routeTree) insert(r *route) {
+func (rt *routeTree) insert(r *route) {
 	// get tree root, corresponding to the http method
-	root := this.treeRoots[r.method]
+	root := rt.treeRoots[r.method]
 	if root == nil {
 		panic("Unsupported http method: " + r.method)
 	}
@@ -86,9 +94,9 @@ func (this *routeTree) insert(r *route) {
 }
 
 // Returns a route and sets the url parameters of the context
-func (this *routeTree) get(ctx *Context) *route {
+func (rt *routeTree) get(ctx *Context) *route {
 	// get tree root, corresponding to the http method
-	root := this.treeRoots[ctx.Request.Method]
+	root := rt.treeRoots[ctx.Request.Method]
 	if root == nil {
 		return nil
 	}
