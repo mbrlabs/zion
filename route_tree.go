@@ -41,7 +41,7 @@ type routeTree struct {
 }
 
 func newRouteTree() routeTree {
-	var roots map[string]*node = make(map[string]*node)
+	roots := make(map[string]*node)
 	roots[http.MethodGet] = &node{part: "", route: nil}
 	roots[http.MethodHead] = &node{part: "", route: nil}
 	roots[http.MethodPost] = &node{part: "", route: nil}
@@ -64,9 +64,8 @@ func (this *routeTree) insert(r *route) {
 		if root.route == nil {
 			root.route = r
 			return
-		} else {
-			panic("Abmigious mapping for the root pattern")
 		}
+		panic("Abmigious mapping for the root pattern")
 	}
 
 	// handle other patterns
@@ -78,9 +77,8 @@ func (this *routeTree) insert(r *route) {
 			if currentNode.route == nil {
 				currentNode.route = r
 				return
-			} else {
-				panic("Abmigious mapping for: " + r.pattern)
 			}
+			panic("Abmigious mapping for: " + r.pattern)
 		}
 	}
 
@@ -109,8 +107,8 @@ func (this *routeTree) get(ctx *Context) *route {
 
 	// handle everything else
 	parts := strings.Split(path, "/")
-	var currentNode *node = root
-	var namedParam *node = nil
+	currentNode := root
+	var namedParam *node
 	foundPart := false
 	for _, part := range parts {
 		foundPart = false
