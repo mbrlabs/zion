@@ -8,13 +8,23 @@ import (
 // ============================================================================
 //                              struct node
 // ============================================================================
+
 type node struct {
 	part  string
 	route *route
 	nodes []*node
 }
 
-func (n *node) nextNode(part string) *node {
+// Returns one of the child nodes, that match the given pattern.
+// If such a node (route) does not exist, it will be inserted and returned.
+func (n *node) getOrInsertNode(part string) *node {
+	// panic if tying to add a wildcard to child nodes if parent already has child nodes
+	isWildcard := strings.HasPrefix(part, "*")
+	if isWildcard && len(n.nodes) > 0 {
+		panic("Ambigious mapping found: wildcards can't be mixed with static urls or named parameters")
+	}
+
+	// try to find existing match
 	isParam := strings.HasPrefix(part, ":")
 	for _, childNode := range n.nodes {
 		// panic if a different named parameter is added to a list of child nodes, which already
@@ -28,6 +38,7 @@ func (n *node) nextNode(part string) *node {
 		}
 	}
 
+	// create new node if nothing found
 	newNode := &node{part: part, route: nil}
 	n.nodes = append(n.nodes, newNode)
 	return newNode
@@ -44,6 +55,7 @@ func (n *node) isWildcard() bool {
 // ============================================================================
 //                              struct routeTree
 // ============================================================================
+
 type routeTree struct {
 	treeRoots map[string]*node
 }
@@ -59,16 +71,25 @@ func newRouteTree() routeTree {
 	return routeTree{treeRoots: roots}
 }
 
+// TODO check for named params & wildcard params witch same name
+// Tries to insert a route into the route tree. Panics if mappings are ambigious
 func (rt *routeTree) insert(r *route) {
+	parts := strings.Split(r.getPattern(), "/")
 	// get tree root, corresponding to the http method
 	root := rt.treeRoots[r.method]
 	if root == nil {
 		panic("Unsupported http method: " + r.method)
 	}
 
-	parts := strings.Split(r.getPattern(), "/")
+	// check if wildcard is at leaf. If not, panic.
+	for i, part := range parts {
+		if i < len(parts)-1 && strings.HasPrefix(part, "*") {
+			panic("Wildcards must be a leaf node")
+		}
+	}
+
 	// handle the root pattern ("")
-	if len(parts) == 1 && parts[0] == "" {
+	if len(parts) == 1 && len(parts[0]) == 0 {
 		if root.route == nil {
 			root.route = r
 			return
@@ -79,7 +100,7 @@ func (rt *routeTree) insert(r *route) {
 	// handle other patterns
 	currentNode := root
 	for i, part := range parts {
-		currentNode = currentNode.nextNode(part)
+		currentNode = currentNode.getOrInsertNode(part)
 		// end of pattern reached. we need to assign the route here
 		if i == len(parts)-1 {
 			if currentNode.route == nil {
@@ -93,7 +114,7 @@ func (rt *routeTree) insert(r *route) {
 	panic("Something went terribly wrong while mapping the route: " + r.pattern)
 }
 
-// Returns a route and sets the url parameters of the context
+// Returns a route and sets the url parameters of the context.
 func (rt *routeTree) get(ctx *Context) *route {
 	// get tree root, corresponding to the http method
 	root := rt.treeRoots[ctx.Request.Method]
@@ -103,13 +124,13 @@ func (rt *routeTree) get(ctx *Context) *route {
 
 	path := strings.Trim(ctx.Request.URL.Path, "/")
 
-	// deny everything that contains a colon
-	if strings.Contains(path, ":") {
+	// deny everything that contains a colon or star
+	if strings.Contains(path, ":") || strings.Contains(path, "*") {
 		return nil
 	}
 
 	// handle root path
-	if path == "" {
+	if len(path) == 0 {
 		return root.route
 	}
 
@@ -122,6 +143,12 @@ func (rt *routeTree) get(ctx *Context) *route {
 		foundPart = false
 		namedParam = nil
 		for _, childNode := range currentNode.nodes {
+			// found a wildcard match
+			if childNode.isWildcard() {
+				key := strings.TrimLeft(currentNode.part, "*")
+				ctx.UrlParams[key] = part
+				return childNode.route
+			}
 			// found a static match
 			if childNode.part == part {
 				currentNode = childNode
@@ -129,7 +156,7 @@ func (rt *routeTree) get(ctx *Context) *route {
 				break
 			}
 			// found a possible match in a named param
-			if strings.Contains(childNode.part, ":") {
+			if childNode.isParam() {
 				namedParam = childNode
 			}
 		}
