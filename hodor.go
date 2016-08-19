@@ -17,8 +17,7 @@ type Hodor struct {
 	router *Router
 }
 
-// Returns a new Hodor instance
-//
+// NewHodor returns a new Hodor instance
 func NewHodor() *Hodor {
 	app := &Hodor{
 		Port:         3000,
@@ -28,6 +27,13 @@ func NewHodor() *Hodor {
 	}
 
 	return app
+}
+
+func (h *Hodor) configServer() {
+	h.server.Addr = h.Host + ":" + strconv.Itoa(h.Port)
+	h.server.ReadTimeout = h.ReadTimeout
+	h.server.WriteTimeout = h.WriteTimeout
+	h.server.Handler = h.router
 }
 
 func (h *Hodor) MountAfter(pattern string, middleware Middleware) {
@@ -62,11 +68,11 @@ func (h *Hodor) Options(pattern string, handler HandlerFunc) {
 	h.router.addRoute(pattern, http.MethodOptions, handler)
 }
 
-func (h *Hodor) configServer() {
-	h.server.Addr = h.Host + ":" + strconv.Itoa(h.Port)
-	h.server.ReadTimeout = h.ReadTimeout
-	h.server.WriteTimeout = h.WriteTimeout
-	h.server.Handler = h.router
+func (h *Hodor) ServeStaticFiles(path string) {
+	fileServer := http.FileServer(http.Dir("/static/"))
+	h.Get(path, func(ctx *Context) {
+		fileServer.ServeHTTP(ctx.Writer, ctx.Request)
+	})
 }
 
 func (h *Hodor) Start() {

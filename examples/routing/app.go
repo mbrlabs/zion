@@ -18,8 +18,10 @@ func (m *TestMiddleware) Name() string {
 
 func main() {
 	app := hodor.NewHodor()
-	app.MountBefore("", new(TestMiddleware))
-	app.MountAfter("", new(TestMiddleware))
+	// app.MountBefore("", new(TestMiddleware))
+	// app.MountAfter("", new(TestMiddleware))
+
+	app.ServeStaticFiles("/static/*")
 
 	app.Get("/test/:param", func(ctx *hodor.Context) {
 		fmt.Fprintf(ctx.Writer, "get => /test/:param -> %s", ctx.UrlParams["param"])
@@ -42,10 +44,6 @@ func main() {
 	})
 	app.Get("/", func(ctx *hodor.Context) {
 		fmt.Fprintf(ctx.Writer, "get => /")
-	})
-
-	app.Get("/static/*path", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "get => /static/*path -> %s", ctx.UrlParams["path"])
 	})
 
 	app.Post("/", func(ctx *hodor.Context) {
