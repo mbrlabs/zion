@@ -22,11 +22,11 @@ func main() {
 	app.MountAfter("", new(TestMiddleware))
 
 	app.Get("/test/:param", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "get => /test/:param -> %s", ctx.UrlParams["param"])
+		fmt.Fprintf(ctx.Writer, "get => /test/:param -> %s", ctx.URLParams["param"])
 	})
 
 	app.Delete("/test/:param", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "delete => /test/:param -> %s", ctx.UrlParams["param"])
+		fmt.Fprintf(ctx.Writer, "delete => /test/:param -> %s", ctx.URLParams["param"])
 	})
 
 	app.Get("/test/hannah", func(ctx *hodor.Context) {
@@ -45,7 +45,7 @@ func main() {
 	})
 
 	app.Get("/static/*path", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "get => /static/*path -> %s", ctx.UrlParams["path"])
+		fmt.Fprintf(ctx.Writer, "get => /static/*path -> %s", ctx.URLParams["path"])
 	})
 
 	app.Post("/", func(ctx *hodor.Context) {
