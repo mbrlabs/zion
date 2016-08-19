@@ -24,11 +24,11 @@ func main() {
 	app.ServeStaticFiles("/static/*")
 
 	app.Get("/test/:param", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "get => /test/:param -> %s", ctx.UrlParams["param"])
+		fmt.Fprintf(ctx.Writer, "get => /test/:param -> %s", ctx.URLParams["param"])
 	})
 
 	app.Delete("/test/:param", func(ctx *hodor.Context) {
-		fmt.Fprintf(ctx.Writer, "delete => /test/:param -> %s", ctx.UrlParams["param"])
+		fmt.Fprintf(ctx.Writer, "delete => /test/:param -> %s", ctx.URLParams["param"])
 	})
 
 	app.Get("/test/hannah", func(ctx *hodor.Context) {

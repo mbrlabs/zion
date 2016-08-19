@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// HandlerFunc #TODO
 type HandlerFunc func(ctx *Context)
 
 // ============================================================================
@@ -34,12 +35,15 @@ func (r *route) getPattern() string {
 // ============================================================================
 // 								struct Router
 // ============================================================================
+
+// Router #TODO
 type Router struct {
 	tree   routeTree
 	after  []Middleware
 	before []Middleware
 }
 
+// NewRouter #TODO
 func NewRouter() *Router {
 	return &Router{tree: newRouteTree()}
 }
