@@ -21,7 +21,7 @@ func main() {
 	// app.MountBefore("", new(TestMiddleware))
 	// app.MountAfter("", new(TestMiddleware))
 
-	app.ServeStaticFiles("/static/*")
+	app.ServeStaticFiles("/static/*", "static/")
 
 	app.Get("/test/:param", func(ctx *hodor.Context) {
 		fmt.Fprintf(ctx.Writer, "get => /test/:param -> %s", ctx.URLParams["param"])

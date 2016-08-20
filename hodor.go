@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -78,11 +79,23 @@ func (h *Hodor) Options(pattern string, handler HandlerFunc) {
 	h.router.addRoute(pattern, http.MethodOptions, handler)
 }
 
-func (h *Hodor) ServeStaticFiles(path string) {
-	fileServer := http.FileServer(http.Dir("/static/"))
-	h.Get(path, func(ctx *Context) {
-		fileServer.ServeHTTP(ctx.Writer, ctx.Request)
-	})
+// ServeStaticFiles #TODO
+func (h *Hodor) ServeStaticFiles(urlPath string, fsPath string) {
+
+	staticPrefix := strings.Trim(urlPath, "/")
+	if strings.HasSuffix(staticPrefix, "*") {
+		staticPrefix = strings.TrimRight(staticPrefix, "*")
+		staticPrefix = "/" + strings.Trim(staticPrefix, "/") + "/"
+
+		fmt.Println(staticPrefix)
+		// Server files
+		fileServer := http.StripPrefix(staticPrefix, http.FileServer(http.Dir(fsPath)))
+		h.Get(urlPath, func(ctx *Context) {
+			fileServer.ServeHTTP(ctx.Writer, ctx.Request)
+		})
+	} else {
+		panic("Static files must be mapped with a wildcard (*) in the pattern url")
+	}
 }
 
 // Start #TODO
