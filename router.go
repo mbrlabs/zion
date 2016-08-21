@@ -41,11 +41,13 @@ type Router struct {
 	tree   routeTree
 	after  []Middleware
 	before []Middleware
+
+	hodor *Hodor
 }
 
 // NewRouter #TODO
-func NewRouter() *Router {
-	return &Router{tree: newRouteTree()}
+func NewRouter(hodor *Hodor) *Router {
+	return &Router{hodor: hodor, tree: newRouteTree()}
 }
 
 func (r *Router) mountAfter(pattern string, middleware Middleware) {
@@ -62,8 +64,8 @@ func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
 	r.tree.insert(newRoute(pattern, method, handler))
 }
 
-func (r Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	ctx := NewContext(resp, req)
+func (r *Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	ctx := NewContext(r.hodor, resp, req)
 	route := r.tree.get(ctx)
 
 	if route == nil {

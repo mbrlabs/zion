@@ -1,0 +1,14 @@
+{{ define "index" }}
+<html>
+<head>
+{{ template "head" . }}
+</head>
+
+<body>
+{{ template "header" . }}
+<div> INDEX: {{.}}</div>
+{{ template "footer" . }}    
+</body>
+
+</html>
+{{ end }}

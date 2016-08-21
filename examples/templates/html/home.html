@@ -1,0 +1,14 @@
+{{ define "home" }}
+<html>
+<head>
+{{ template "head" . }}
+</head>
+
+<body>
+{{ template "header" . }}
+<div> HOME: {{.}}</div>
+{{ template "footer" . }}    
+</body>
+
+</html>
+{{ end }}

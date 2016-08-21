@@ -15,8 +15,9 @@ type Hodor struct {
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 
-	server http.Server
-	router *Router
+	server         http.Server
+	router         *Router
+	templateEngine HTMLTemplateEngine
 }
 
 // NewHodor returns a new Hodor instance
@@ -30,11 +31,12 @@ func (h *Hodor) configServer() {
 // NewHodor #TODO
 func NewHodor() *Hodor {
 	app := &Hodor{
-		Port:         3000,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		router:       NewRouter(),
+		Port:           3000,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		templateEngine: NewDefaultTemplateEngine(),
 	}
+	app.router = NewRouter(app)
 
 	return app
 }
@@ -81,13 +83,11 @@ func (h *Hodor) Options(pattern string, handler HandlerFunc) {
 
 // ServeStaticFiles #TODO
 func (h *Hodor) ServeStaticFiles(urlPath string, fsPath string) {
-
 	staticPrefix := strings.Trim(urlPath, "/")
 	if strings.HasSuffix(staticPrefix, "*") {
 		staticPrefix = strings.TrimRight(staticPrefix, "*")
 		staticPrefix = "/" + strings.Trim(staticPrefix, "/") + "/"
 
-		fmt.Println(staticPrefix)
 		// Server files
 		fileServer := http.StripPrefix(staticPrefix, http.FileServer(http.Dir(fsPath)))
 		h.Get(urlPath, func(ctx *Context) {
@@ -98,10 +98,14 @@ func (h *Hodor) ServeStaticFiles(urlPath string, fsPath string) {
 	}
 }
 
+func (h *Hodor) Templates(path string) {
+	h.templateEngine.CompileTemplates(path)
+}
+
 // Start #TODO
 func (h *Hodor) Start() {
+	h.configServer()
 	fmt.Println("Listening on http://localhost:3000")
 
-	h.configServer()
 	h.server.ListenAndServe()
 }

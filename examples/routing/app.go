@@ -42,6 +42,7 @@ func main() {
 	app.Get("/test", func(ctx *hodor.Context) {
 		fmt.Fprintf(ctx.Writer, "get => /test")
 	})
+
 	app.Get("/", func(ctx *hodor.Context) {
 		fmt.Fprintf(ctx.Writer, "get => /")
 	})
