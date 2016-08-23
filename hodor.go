@@ -18,6 +18,9 @@ type Hodor struct {
 	server         http.Server
 	router         *Router
 	templateEngine HTMLTemplateEngine
+
+	SessionStore SessionStore
+	UserStore    UserStore
 }
 
 // NewHodor returns a new Hodor instance

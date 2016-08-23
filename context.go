@@ -6,12 +6,12 @@ import (
 
 // Context #TODO
 type Context struct {
+	hodor *Hodor
+
 	Writer    http.ResponseWriter
 	Request   *http.Request
 	URLParams map[string]string
 	User      *User
-
-	hodor *Hodor
 }
 
 // NewContext #TODO

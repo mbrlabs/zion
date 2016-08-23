@@ -22,12 +22,14 @@ func AuthenticateHandlerFunc(userStore UserStore, sessionStore SessionStore,
 		// handle empty input
 		if len(login) == 0 || len(password) == 0 {
 			http.Redirect(ctx.Writer, ctx.Request, errorPath, http.StatusOK)
+			return
 		}
 
 		// get user
 		user := userStore.GetUserByLogin(login)
 		if user == nil {
 			http.Redirect(ctx.Writer, ctx.Request, errorPath, http.StatusOK)
+			return
 		}
 
 		// authenticate user
@@ -55,6 +57,10 @@ func AuthenticateHandlerFunc(userStore UserStore, sessionStore SessionStore,
 	}
 }
 
+// ============================================================================
+// 								struct Session
+// ============================================================================
+
 // Session #TODO
 type Session struct {
 	ID     string
@@ -70,11 +76,19 @@ func NewSession(user User) *Session {
 	}
 }
 
+// ============================================================================
+// 								UserStore
+// ============================================================================
+
 // UserStore #
 type UserStore interface {
 	GetUserByLogin(string) User
 	Authenticate(User, string) bool
 }
+
+// ============================================================================
+// 								SessionStore
+// ============================================================================
 
 // SessionStore #
 type SessionStore interface {
