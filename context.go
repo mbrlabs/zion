@@ -9,6 +9,7 @@ type Context struct {
 	Writer    http.ResponseWriter
 	Request   *http.Request
 	URLParams map[string]string
+	User      *User
 
 	hodor *Hodor
 }
