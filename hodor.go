@@ -37,6 +37,8 @@ func NewHodor() *Hodor {
 		Port:           3000,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
+		SessionStore:   NewMemorySessionStore(),
+		UserStore:      NewMemoryUserStore(),
 		templateEngine: NewDefaultTemplateEngine(),
 	}
 	app.router = NewRouter(app)
@@ -82,6 +84,10 @@ func (h *Hodor) Delete(pattern string, handler HandlerFunc) {
 // Options #TODO
 func (h *Hodor) Options(pattern string, handler HandlerFunc) {
 	h.router.addRoute(pattern, http.MethodOptions, handler)
+}
+
+func (h *Hodor) Login(urlPattern string, loginFieldName string, passwordFieldName, successPath string, errorPath string) {
+	h.Post(urlPattern, authenticateHandlerFunc(h, loginFieldName, passwordFieldName, successPath, errorPath))
 }
 
 // ServeStaticFiles #TODO

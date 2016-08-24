@@ -2,6 +2,8 @@ package hodor
 
 import (
 	"crypto/rand"
+	"crypto/sha512"
+	"encoding/base64"
 )
 
 const (
@@ -22,4 +24,10 @@ func generateRandomString(length int, alpabet string) string {
 	}
 
 	return string(id)
+}
+
+func HashSha512(str string, salt string) string {
+	hasher := sha512.New()
+	hasher.Write([]byte(salt + str))
+	return base64.StdEncoding.EncodeToString(hasher.Sum(nil))
 }

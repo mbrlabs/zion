@@ -1,19 +1,20 @@
 package hodor
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
 
 const (
 	sessionExpire     = 24 * 3 * time.Hour
-	sessionLength     = 42
+	sessionLength     = 64
 	sessionCookieName = "hsession"
 )
 
 // AuthenticateHandlerFunc #TODO
-func AuthenticateHandlerFunc(userStore UserStore, sessionStore SessionStore,
-	loginFieldName string, passwordFieldName, successPath string, errorPath string) HandlerFunc {
+func authenticateHandlerFunc(hodor *Hodor, loginFieldName string, passwordFieldName,
+	successPath string, errorPath string) HandlerFunc {
 
 	return func(ctx *Context) {
 		login := ctx.Request.FormValue(loginFieldName)
@@ -26,18 +27,18 @@ func AuthenticateHandlerFunc(userStore UserStore, sessionStore SessionStore,
 		}
 
 		// get user
-		user := userStore.GetUserByLogin(login)
+		user := hodor.UserStore.GetUserByLogin(login)
 		if user == nil {
 			http.Redirect(ctx.Writer, ctx.Request, errorPath, http.StatusOK)
 			return
 		}
 
 		// authenticate user
-		if userStore.Authenticate(user, password) {
+		if hodor.UserStore.Authenticate(user, password) {
 			// create new session
 			session := NewSession(user)
-			err := sessionStore.Save(session)
-			if err != nil {
+			err := hodor.SessionStore.Save(session)
+			if err == nil {
 				// set cockie
 				cookie := &http.Cookie{
 					Name:    sessionCookieName,
@@ -45,7 +46,6 @@ func AuthenticateHandlerFunc(userStore UserStore, sessionStore SessionStore,
 					Expires: session.Expire,
 				}
 				http.SetCookie(ctx.Writer, cookie)
-
 				// redirect to succcess page
 				http.Redirect(ctx.Writer, ctx.Request, successPath, http.StatusOK)
 				return
@@ -70,14 +70,14 @@ type Session struct {
 
 func NewSession(user User) *Session {
 	return &Session{
-		ID:     generateRandomString(sessionLength, alphabetAlphaNumPlus),
+		ID:     generateRandomString(sessionLength, alphabetAlphaNum),
 		UserID: user.GetID(),
 		Expire: time.Now().Add(sessionExpire),
 	}
 }
 
 // ============================================================================
-// 								UserStore
+// 					interface UserStore & struct MemoryUserStore
 // ============================================================================
 
 // UserStore #
@@ -86,8 +86,28 @@ type UserStore interface {
 	Authenticate(User, string) bool
 }
 
+type MemoryUserStore struct {
+	users map[string]User
+}
+
+func NewMemoryUserStore() UserStore {
+	users := make(map[string]User)
+	user := NewHodorUser("123", "root@hodor.com", "root@hodor.com", "hodor")
+	users[user.GetLogin()] = user
+	return MemoryUserStore{users: users}
+}
+
+func (s MemoryUserStore) GetUserByLogin(login string) User {
+	return s.users[login]
+}
+
+func (s MemoryUserStore) Authenticate(user User, password string) bool {
+	fmt.Printf("%s store: %s | user: %s", user.GetLogin(), user.GetPassword(), password)
+	return user.GetPassword() == password
+}
+
 // ============================================================================
-// 								SessionStore
+// 					interface SessionStore & Memory UserStore
 // ============================================================================
 
 // SessionStore #
@@ -95,4 +115,26 @@ type SessionStore interface {
 	Find(string) *Session
 	Save(*Session) error
 	Delete(*Session) error
+}
+
+type MemorySessionStore struct {
+	sessions map[string]*Session
+}
+
+func NewMemorySessionStore() SessionStore {
+	return MemorySessionStore{sessions: make(map[string]*Session)}
+}
+
+func (s MemorySessionStore) Find(id string) *Session {
+	return s.Find(id)
+}
+
+func (s MemorySessionStore) Save(session *Session) error {
+	s.sessions[session.ID] = session
+	return nil
+}
+
+func (s MemorySessionStore) Delete(session *Session) error {
+	delete(s.sessions, session.ID)
+	return nil
 }

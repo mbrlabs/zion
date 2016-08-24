@@ -28,6 +28,15 @@ type HodorUser struct {
 	rights   []*UserRight
 }
 
+func NewHodorUser(id string, email string, login string, password string) User {
+	return &HodorUser{
+		id:       id,
+		login:    login,
+		email:    email,
+		password: password,
+	}
+}
+
 func (u *HodorUser) GetID() string {
 	return u.id
 }
