@@ -4,15 +4,6 @@ import (
 	"net/http"
 )
 
-type HodorSecurity struct {
-	Strategy   SecurityStrategy
-	Middleware Middleware
-}
-
-func (s *HodorSecurity) Authenticate() HandlerFunc {
-	return s.Strategy.Authenticate()
-}
-
 type SecurityStrategy interface {
 	Authenticate() HandlerFunc
 }

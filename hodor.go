@@ -15,9 +15,8 @@ type Hodor struct {
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 
-	server   http.Server
-	router   *Router
-	Security *HodorSecurity
+	server http.Server
+	router *Router
 
 	templateEngine HTMLTemplateEngine
 }
@@ -37,7 +36,6 @@ func NewHodor() *Hodor {
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		templateEngine: NewDefaultTemplateEngine(),
-		Security:       &HodorSecurity{},
 	}
 	app.router = NewRouter(app)
 
