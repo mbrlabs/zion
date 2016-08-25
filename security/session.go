@@ -1,6 +1,7 @@
-package hodor
+package security
 
 import (
+	"github.com/mbrlabs/hodor"
 	"time"
 )
 
@@ -8,6 +9,7 @@ const (
 	sessionExpire     = 24 * 3 * time.Hour
 	sessionLength     = 64
 	sessionCookieName = "hsession"
+	sessionAlphabet   = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
 // Session #TODO
@@ -17,9 +19,9 @@ type Session struct {
 	Expire time.Time
 }
 
-func NewSession(user User) *Session {
+func NewSession(user hodor.User) *Session {
 	return &Session{
-		ID:     generateRandomString(sessionLength, alphabetAlphaNum),
+		ID:     hodor.GenerateRandomString(sessionLength, sessionAlphabet),
 		UserID: user.GetID(),
 		Expire: time.Now().Add(sessionExpire),
 	}
@@ -45,7 +47,7 @@ func NewMemorySessionStore() SessionStore {
 }
 
 func (s MemorySessionStore) Find(id string) *Session {
-	return s.Find(id)
+	return s.sessions[id]
 }
 
 func (s MemorySessionStore) Save(session *Session) error {

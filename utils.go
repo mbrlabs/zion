@@ -6,12 +6,7 @@ import (
 	"encoding/base64"
 )
 
-const (
-	alphabetAlphaNum     = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	alphabetAlphaNumPlus = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&()*+-./<=>?@[]^_{|}~"
-)
-
-func generateRandomString(length int, alpabet string) string {
+func GenerateRandomString(length int, alpabet string) string {
 	alpabetLen := byte(len(alpabet))
 
 	// make generate random byte array

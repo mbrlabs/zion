@@ -73,7 +73,7 @@ func newRouteTree() routeTree {
 
 // TODO check for named params & wildcard params witch same name
 // Tries to insert a route into the route tree. Panics if mappings are ambigious
-func (rt *routeTree) insert(r *route) {
+func (rt *routeTree) insertRoute(r *route) {
 	parts := strings.Split(r.getPattern(), "/")
 	// get tree root, corresponding to the http method
 	root := rt.treeRoots[r.method]

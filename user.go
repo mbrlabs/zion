@@ -15,13 +15,6 @@ type User interface {
 	GetIndividualUserRights() []*UserRight
 }
 
-// UserStore #
-type UserStore interface {
-	GetUserByLogin(string) User
-	GetUserByID(string) User
-	Authenticate(User, string) bool
-}
-
 // UserRole #
 type UserRole struct {
 	Name   string

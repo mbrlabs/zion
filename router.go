@@ -13,9 +13,10 @@ type HandlerFunc func(ctx *Context)
 // 								struct route
 // ============================================================================
 type route struct {
-	pattern string
-	method  string
-	handler HandlerFunc
+	pattern    string
+	method     string
+	handler    HandlerFunc
+	middleware []Middleware
 }
 
 func newRoute(pattern string, method string, handler HandlerFunc) *route {
@@ -61,7 +62,7 @@ func (r *Router) mountBefore(pattern string, middleware Middleware) {
 }
 
 func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
-	r.tree.insert(newRoute(pattern, method, handler))
+	r.tree.insertRoute(newRoute(pattern, method, handler))
 }
 
 func (r *Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
