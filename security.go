@@ -1,43 +1,83 @@
 package hodor
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 )
 
-const (
-	sessionExpire     = 24 * 3 * time.Hour
-	sessionLength     = 64
-	sessionCookieName = "hsession"
-)
+type HodorSecurity struct {
+	Strategy   SecurityStrategy
+	Middleware Middleware
+}
 
-// AuthenticateHandlerFunc #TODO
-func authenticateHandlerFunc(hodor *Hodor, loginFieldName string, passwordFieldName,
-	successPath string, errorPath string) HandlerFunc {
+func (s *HodorSecurity) Authenticate() HandlerFunc {
+	return s.Strategy.Authenticate()
+}
 
+type SecurityStrategy interface {
+	Authenticate() HandlerFunc
+}
+
+// ============================================================================
+// 							Local strategy + middleware
+// ============================================================================
+
+type LocalSecurityStrategy struct {
+	userStore       UserStore
+	sessionStore    SessionStore
+	successRedirect string
+	failureRedirect string
+	loginNameField  string
+	passwordField   string
+}
+
+func NewLocalSecurityStrategy(userStore UserStore, sessionStore SessionStore) *LocalSecurityStrategy {
+	return &LocalSecurityStrategy{
+		userStore:    userStore,
+		sessionStore: sessionStore,
+	}
+}
+
+func (ls *LocalSecurityStrategy) SetUserStore(store UserStore) {
+	ls.userStore = store
+}
+
+func (ls *LocalSecurityStrategy) SetSessionStore(store SessionStore) {
+	ls.sessionStore = store
+}
+
+func (ls *LocalSecurityStrategy) SetRedirects(successRedirect string, failureRedirect string) {
+	ls.failureRedirect = failureRedirect
+	ls.successRedirect = successRedirect
+}
+
+func (ls *LocalSecurityStrategy) SetPostParameterFields(loginNameField string, passwordField string) {
+	ls.loginNameField = loginNameField
+	ls.passwordField = passwordField
+}
+
+func (ls *LocalSecurityStrategy) Authenticate() HandlerFunc {
 	return func(ctx *Context) {
-		login := ctx.Request.FormValue(loginFieldName)
-		password := ctx.Request.FormValue(passwordFieldName)
+		login := ctx.Request.FormValue(ls.loginNameField)
+		password := ctx.Request.FormValue(ls.passwordField)
 
 		// handle empty input
 		if len(login) == 0 || len(password) == 0 {
-			http.Redirect(ctx.Writer, ctx.Request, errorPath, http.StatusOK)
+			http.Redirect(ctx.Writer, ctx.Request, ls.failureRedirect, http.StatusOK)
 			return
 		}
 
 		// get user
-		user := hodor.UserStore.GetUserByLogin(login)
+		user := ls.userStore.GetUserByLogin(login)
 		if user == nil {
-			http.Redirect(ctx.Writer, ctx.Request, errorPath, http.StatusOK)
+			http.Redirect(ctx.Writer, ctx.Request, ls.failureRedirect, http.StatusOK)
 			return
 		}
 
 		// authenticate user
-		if hodor.UserStore.Authenticate(user, password) {
+		if ls.userStore.Authenticate(user, password) {
 			// create new session
 			session := NewSession(user)
-			err := hodor.SessionStore.Save(session)
+			err := ls.sessionStore.Save(session)
 			if err == nil {
 				// set cockie
 				cookie := &http.Cookie{
@@ -47,94 +87,60 @@ func authenticateHandlerFunc(hodor *Hodor, loginFieldName string, passwordFieldN
 				}
 				http.SetCookie(ctx.Writer, cookie)
 				// redirect to succcess page
-				http.Redirect(ctx.Writer, ctx.Request, successPath, http.StatusOK)
+				http.Redirect(ctx.Writer, ctx.Request, ls.successRedirect, http.StatusOK)
 				return
 			}
 		}
 
 		// redirect to error page
-		http.Redirect(ctx.Writer, ctx.Request, errorPath, http.StatusOK)
+		http.Redirect(ctx.Writer, ctx.Request, ls.failureRedirect, http.StatusOK)
 	}
 }
 
-// ============================================================================
-// 								struct Session
-// ============================================================================
-
-// Session #TODO
-type Session struct {
-	ID     string
-	UserID string
-	Expire time.Time
+// LocalSecurityMiddleware #
+type LocalSecurityMiddleware struct {
+	userStore    UserStore
+	sessionStore SessionStore
 }
 
-func NewSession(user User) *Session {
-	return &Session{
-		ID:     generateRandomString(sessionLength, alphabetAlphaNum),
-		UserID: user.GetID(),
-		Expire: time.Now().Add(sessionExpire),
+func NewLocalSecurityMiddleware(userStore UserStore, sessionStore SessionStore) *LocalSecurityMiddleware {
+	return &LocalSecurityMiddleware{
+		userStore:    userStore,
+		sessionStore: sessionStore,
 	}
 }
 
-// ============================================================================
-// 					interface UserStore & struct MemoryUserStore
-// ============================================================================
-
-// UserStore #
-type UserStore interface {
-	GetUserByLogin(string) User
-	Authenticate(User, string) bool
+func (ls *LocalSecurityMiddleware) SetUserStore(store UserStore) {
+	ls.userStore = store
 }
 
-type MemoryUserStore struct {
-	users map[string]User
+func (ls *LocalSecurityMiddleware) SetSessionStore(store SessionStore) {
+	ls.sessionStore = store
 }
 
-func NewMemoryUserStore() UserStore {
-	users := make(map[string]User)
-	user := NewHodorUser("123", "root@hodor.com", "root@hodor.com", "hodor")
-	users[user.GetLogin()] = user
-	return MemoryUserStore{users: users}
+func (sm *LocalSecurityMiddleware) Execute(ctx *Context) bool {
+	cookie, err := ctx.Request.Cookie(sessionCookieName)
+	if err != nil {
+		http.NotFound(ctx.Writer, ctx.Request)
+		return false
+	}
+
+	session := sm.sessionStore.Find(cookie.Value)
+	if session == nil {
+		http.NotFound(ctx.Writer, ctx.Request)
+		return false
+	}
+
+	user := sm.userStore.GetUserByID(session.UserID)
+	if user == nil {
+		http.NotFound(ctx.Writer, ctx.Request)
+		return false
+	}
+
+	ctx.User = user
+	return true
 }
 
-func (s MemoryUserStore) GetUserByLogin(login string) User {
-	return s.users[login]
-}
-
-func (s MemoryUserStore) Authenticate(user User, password string) bool {
-	fmt.Printf("%s store: %s | user: %s", user.GetLogin(), user.GetPassword(), password)
-	return user.GetPassword() == password
-}
-
-// ============================================================================
-// 					interface SessionStore & Memory UserStore
-// ============================================================================
-
-// SessionStore #
-type SessionStore interface {
-	Find(string) *Session
-	Save(*Session) error
-	Delete(*Session) error
-}
-
-type MemorySessionStore struct {
-	sessions map[string]*Session
-}
-
-func NewMemorySessionStore() SessionStore {
-	return MemorySessionStore{sessions: make(map[string]*Session)}
-}
-
-func (s MemorySessionStore) Find(id string) *Session {
-	return s.Find(id)
-}
-
-func (s MemorySessionStore) Save(session *Session) error {
-	s.sessions[session.ID] = session
-	return nil
-}
-
-func (s MemorySessionStore) Delete(session *Session) error {
-	delete(s.sessions, session.ID)
-	return nil
+func (sm *LocalSecurityMiddleware) Name() string {
+	return "LocalSecurityMiddleware"
 }
