@@ -21,6 +21,18 @@ import (
 	"strings"
 )
 
+const (
+	pageNotFoundPage = "<!DOCTYPE html><html><head><title>Page Not Found</title></head><body>" +
+		"<h2>Page not found</h2>" +
+		"</body></html>"
+	serverErrorPageProduction = "<!DOCTYPE html><html><head><title>Server Error</title></head><body>" +
+		"<h2>Internal Server Error</h2>" +
+		"</body></html>"
+	serverErrorPageDevelopment = "<!DOCTYPE html><html><head><title>Server Error</title></head><body>" +
+		"<h2>Internal Server Error</h2></br>%s" +
+		"</body></html>"
+)
+
 // HandlerFunc #TODO
 type HandlerFunc func(ctx *Context)
 
@@ -80,16 +92,16 @@ func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
 	r.tree.insertRoute(newRoute(pattern, method, handler))
 }
 
-func (r *Router) recover(resp http.ResponseWriter, req *http.Request) {
+func (r *Router) recover(w http.ResponseWriter, req *http.Request) {
 	if obj := recover(); obj != nil {
-		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", string(debug.Stack()[:]))
+		stacktrace := string(debug.Stack()[:])
+		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", stacktrace)
+		if r.hodor.config.DevelopmentMode {
+			fmt.Fprintf(w, serverErrorPageDevelopment, escapeHTML(stacktrace))
+		} else {
+			fmt.Fprintf(w, serverErrorPageProduction)
+		}
 	}
-
-	// TODO send depending on dev mode a detailed message.
-	// also make it possible to define a custom page in case of a panic recovery.
-
-	// send internal server error
-	resp.WriteHeader(http.StatusInternalServerError)
 }
 
 func (r *Router) serve(resp http.ResponseWriter, req *http.Request) {

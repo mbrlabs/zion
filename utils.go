@@ -18,6 +18,7 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"encoding/base64"
+	"strings"
 )
 
 func GenerateRandomString(length int, alpabet string) string {
@@ -39,4 +40,11 @@ func HashSha512(str string, salt string) string {
 	hasher := sha512.New()
 	hasher.Write([]byte(salt + str))
 	return base64.StdEncoding.EncodeToString(hasher.Sum(nil))
+}
+
+func escapeHTML(s string) string {
+	new := strings.Replace(s, " ", "&nbsp;", -1)
+	new = strings.Replace(new, "\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", -1)
+	new = strings.Replace(new, "\n", "</br>", -1)
+	return new
 }

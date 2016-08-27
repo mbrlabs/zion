@@ -30,6 +30,9 @@ type Config struct {
 	StaticFilePath       string
 	StaticFileURLPattern string
 
+	PageNotFoundRedirect string
+	ServerErrorRedirect  string
+
 	DevelopmentMode bool
 }
 
