@@ -27,18 +27,18 @@ type SecurityStrategy interface {
 type SecurityRule struct {
 	pattern            []string
 	allowedHTTPMethods map[string]bool
-	userRoles          []hodor.UserRole
+	userRoles          []string
 }
 
 type SecurityRules []SecurityRule
 
-func NewSecurityRule(pattern string, httpMethods []string, userRoles []hodor.UserRole) SecurityRule {
+func NewSecurityRule(pattern string, httpMethods []string, userRoles []string) SecurityRule {
 	// convert nils to empty slices
 	if httpMethods == nil {
 		httpMethods = make([]string, 0)
 	}
 	if userRoles == nil {
-		userRoles = make([]hodor.UserRole, 0)
+		userRoles = make([]string, 0)
 	}
 
 	// create a set of http methods

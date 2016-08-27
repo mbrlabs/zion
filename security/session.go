@@ -21,7 +21,7 @@ import (
 
 const (
 	sessionExpire     = 24 * 3 * time.Hour
-	sessionLength     = 64
+	sessionLength     = 120
 	sessionCookieName = "hsession"
 	sessionAlphabet   = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )

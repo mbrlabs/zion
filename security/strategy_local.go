@@ -15,6 +15,7 @@
 package security
 
 import (
+	"fmt"
 	"github.com/mbrlabs/hodor"
 	"net/http"
 )
@@ -69,8 +70,8 @@ func (ls *LocalSecurityStrategy) Authenticate() hodor.HandlerFunc {
 		}
 
 		// get user
-		user := ls.userStore.GetUserByLogin(login)
-		if user == nil {
+		user, err := ls.userStore.GetUserByLogin(login)
+		if user == nil || err != nil {
 			http.Redirect(ctx.Writer, ctx.Request, ls.failureRedirect, http.StatusOK)
 			return
 		}
@@ -133,6 +134,10 @@ func (sm *LocalSecurityMiddleware) Execute(ctx *hodor.Context) bool {
 	// get cookie from request header
 	cookie, err := ctx.Request.Cookie(sessionCookieName)
 	if err != nil {
+		if sm.rules.IsAllowed(nil, ctx) {
+			return true
+		}
+		fmt.Println("User with no cookie set tries to acacess restricted page")
 		http.NotFound(ctx.Writer, ctx.Request)
 		return false
 	}
@@ -143,7 +148,11 @@ func (sm *LocalSecurityMiddleware) Execute(ctx *hodor.Context) bool {
 
 	// get user by userID stored in session
 	if session != nil {
-		user = sm.userStore.GetUserByID(session.UserID)
+		var err error
+		user, err = sm.userStore.GetUserByID(session.UserID)
+		if err != nil {
+			user = nil
+		}
 	}
 
 	// go through all security rules

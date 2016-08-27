@@ -18,7 +18,36 @@ import "github.com/mbrlabs/hodor"
 
 // UserStore #
 type UserStore interface {
-	GetUserByLogin(string) hodor.User
-	GetUserByID(string) hodor.User
+	GetUserByLogin(string) (hodor.User, error)
+	GetUserByID(string) (hodor.User, error)
 	Authenticate(hodor.User, string) bool
+}
+
+type MemoryUserStore struct {
+	loginToUser map[string]hodor.User
+	idToUser    map[string]hodor.User
+}
+
+func NewMemoryUserStore() *MemoryUserStore {
+	return &MemoryUserStore{
+		loginToUser: make(map[string]hodor.User),
+		idToUser:    make(map[string]hodor.User),
+	}
+}
+
+func (us *MemoryUserStore) GetUserByLogin(login string) (hodor.User, error) {
+	return us.loginToUser[login], nil
+}
+
+func (us *MemoryUserStore) GetUserByID(id string) (hodor.User, error) {
+	return us.idToUser[id], nil
+}
+
+func (us *MemoryUserStore) AddUser(user hodor.User) {
+	us.loginToUser[user.GetLogin()] = user
+	us.idToUser[user.GetID()] = user
+}
+
+func (us *MemoryUserStore) Authenticate(user hodor.User, password string) bool {
+	return user.GetPassword() == password
 }
