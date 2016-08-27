@@ -19,38 +19,18 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // Hodor #TODO
 type Hodor struct {
-	Host         string
-	Port         int
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
-
 	server http.Server
 	router *Router
-
-	templateEngine HTMLTemplateEngine
-}
-
-// NewHodor returns a new Hodor instance
-func (h *Hodor) configServer() {
-	h.server.Addr = h.Host + ":" + strconv.Itoa(h.Port)
-	h.server.ReadTimeout = h.ReadTimeout
-	h.server.WriteTimeout = h.WriteTimeout
-	h.server.Handler = h.router
+	config *Config
 }
 
 // NewHodor #TODO
-func NewHodor() *Hodor {
-	app := &Hodor{
-		Port:           3000,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		templateEngine: NewDefaultTemplateEngine(),
-	}
+func NewHodor(config *Config) *Hodor {
+	app := &Hodor{config: config}
 	app.router = NewRouter(app)
 
 	return app
@@ -113,13 +93,34 @@ func (h *Hodor) ServeStaticFiles(urlPath string, fsPath string) {
 	}
 }
 
-func (h *Hodor) Templates(path string) {
-	h.templateEngine.CompileTemplates(path)
+func (h *Hodor) checkConfig() {
+	// TODO check server timeouts
+
+	// TODO check host + port config
+
+	// TODO check template settings
+
+	// TODO print development mode warnings
+}
+
+func (h *Hodor) prepare() {
+	// prepare server
+	h.server.Addr = h.config.Host + ":" + strconv.Itoa(h.config.Port)
+	h.server.ReadTimeout = h.config.ReadTimeout
+	h.server.WriteTimeout = h.config.WriteTimeout
+	h.server.Handler = h.router
+
+	// setup static files
+	h.ServeStaticFiles(h.config.StaticFileURLPattern, h.config.StaticFilePath)
+
+	// compile templates
+	h.config.TemplateEngine.CompileTemplates(h.config.TemplatePath)
 }
 
 // Start #TODO
 func (h *Hodor) Start() {
-	h.configServer()
+	h.checkConfig()
+	h.prepare()
 	fmt.Println("Listening on http://localhost:3000")
 
 	h.server.ListenAndServe()

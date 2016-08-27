@@ -40,7 +40,7 @@ func NewContext(h *Hodor, w http.ResponseWriter, r *http.Request) *Context {
 
 // Render #TODO
 func (ctx *Context) Render(name string, data interface{}) {
-	ctx.hodor.templateEngine.Render(name, data, ctx.Writer)
+	ctx.hodor.config.TemplateEngine.Render(name, data, ctx.Writer)
 }
 
 func (ctx *Context) SendStatus(status int) {
