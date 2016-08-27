@@ -115,6 +115,11 @@ func (h *Hodor) prepare() {
 
 	// compile templates
 	h.config.TemplateEngine.CompileTemplates(h.config.TemplatePath)
+
+	// configure development mode stuff
+	if h.config.DevelopmentMode {
+		h.config.TemplateEngine.EnableRecompiling(true)
+	}
 }
 
 // Start #TODO

@@ -24,6 +24,7 @@ import (
 
 // HTMLTemplateEngine #TODO
 type HTMLTemplateEngine interface {
+	EnableRecompiling(enable bool)
 	CompileTemplates(path string) error
 	Render(name string, data interface{}, w http.ResponseWriter)
 }
@@ -33,19 +34,23 @@ type HTMLTemplateEngine interface {
 // ============================================================================
 
 type goTemplateEngine struct {
-	templates *template.Template
+	templatePath       string
+	templates          *template.Template
+	recompilingEnabled bool
 }
 
 // NewDefaultTemplateEngine #TODO
 func NewDefaultTemplateEngine() HTMLTemplateEngine {
-	return &goTemplateEngine{}
+	return &goTemplateEngine{recompilingEnabled: false}
 }
 
-func (eng *goTemplateEngine) CompileTemplates(pathToTemplates string) error {
+func (eng *goTemplateEngine) CompileTemplates(templatePath string) error {
+	eng.templatePath = templatePath
+
 	// collect templates
 	var tmplList []string
 	var err error
-	filepath.Walk(pathToTemplates, func(path string, info os.FileInfo, ínternalError error) error {
+	filepath.Walk(templatePath, func(path string, info os.FileInfo, ínternalError error) error {
 		fmt.Println(path)
 		if ínternalError != nil {
 			err = ínternalError
@@ -68,5 +73,14 @@ func (eng *goTemplateEngine) CompileTemplates(pathToTemplates string) error {
 }
 
 func (eng *goTemplateEngine) Render(name string, data interface{}, w http.ResponseWriter) {
+	// recompile before render if enabled
+	if eng.recompilingEnabled {
+		eng.CompileTemplates(eng.templatePath)
+	}
+	// render
 	eng.templates.ExecuteTemplate(w, name, data)
+}
+
+func (eng *goTemplateEngine) EnableRecompiling(enable bool) {
+	eng.recompilingEnabled = enable
 }
