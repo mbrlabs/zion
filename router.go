@@ -109,8 +109,12 @@ func (r *router) serve(resp http.ResponseWriter, req *http.Request) {
 	route := r.tree.get(ctx)
 
 	if route == nil {
-		// we didn't find a handler -> send a 404
-		http.NotFound(resp, req)
+		// we didn't find a handler -> send a 404 or redirect to error page
+		if len(r.hodor.config.PageNotFoundRedirect) > 0 {
+			ctx.Redirect(r.hodor.config.PageNotFoundRedirect)
+		} else {
+			http.NotFound(resp, req)
+		}
 	} else {
 		// before middleware
 		for _, mw := range r.before {
