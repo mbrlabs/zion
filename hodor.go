@@ -24,14 +24,14 @@ import (
 // Hodor #TODO
 type Hodor struct {
 	server http.Server
-	router *Router
+	router *router
 	config *Config
 }
 
 // NewHodor #TODO
 func NewHodor(config *Config) *Hodor {
 	app := &Hodor{config: config}
-	app.router = NewRouter(app)
+	app.router = newRouter(app)
 
 	return app
 }

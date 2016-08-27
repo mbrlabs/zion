@@ -45,6 +45,6 @@ func HashSha512(str string, salt string) string {
 func escapeHTML(s string) string {
 	new := strings.Replace(s, " ", "&nbsp;", -1)
 	new = strings.Replace(new, "\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", -1)
-	new = strings.Replace(new, "\n", "</br>", -1)
+	new = strings.Replace(new, "\n", "<br>", -1)
 	return new
 }

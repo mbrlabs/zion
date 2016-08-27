@@ -65,7 +65,7 @@ func (r *route) getPattern() string {
 // ============================================================================
 
 // Router #TODO
-type Router struct {
+type router struct {
 	tree   routeTree
 	after  []Middleware
 	before []Middleware
@@ -74,25 +74,25 @@ type Router struct {
 }
 
 // NewRouter #TODO
-func NewRouter(hodor *Hodor) *Router {
-	return &Router{hodor: hodor, tree: newRouteTree()}
+func newRouter(hodor *Hodor) *router {
+	return &router{hodor: hodor, tree: newRouteTree()}
 }
 
-func (r *Router) mountAfter(pattern string, middleware Middleware) {
+func (r *router) mountAfter(pattern string, middleware Middleware) {
 	r.after = append(r.after, middleware)
 	fmt.Printf("mountAfter: %s\n", middleware.Name())
 }
 
-func (r *Router) mountBefore(pattern string, middleware Middleware) {
+func (r *router) mountBefore(pattern string, middleware Middleware) {
 	r.before = append(r.before, middleware)
 	fmt.Printf("mountBefore: %s\n", middleware.Name())
 }
 
-func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
+func (r *router) addRoute(pattern string, method string, handler HandlerFunc) {
 	r.tree.insertRoute(newRoute(pattern, method, handler))
 }
 
-func (r *Router) recover(w http.ResponseWriter, req *http.Request) {
+func (r *router) recover(w http.ResponseWriter, req *http.Request) {
 	if obj := recover(); obj != nil {
 		stacktrace := string(debug.Stack()[:])
 		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", stacktrace)
@@ -104,7 +104,7 @@ func (r *Router) recover(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (r *Router) serve(resp http.ResponseWriter, req *http.Request) {
+func (r *router) serve(resp http.ResponseWriter, req *http.Request) {
 	ctx := NewContext(r.hodor, resp, req)
 	route := r.tree.get(ctx)
 
@@ -129,7 +129,7 @@ func (r *Router) serve(resp http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (r *Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (r *router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	defer r.recover(resp, req)
 	r.serve(resp, req)
 }

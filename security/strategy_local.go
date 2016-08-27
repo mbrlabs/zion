@@ -90,13 +90,21 @@ func (ls *LocalSecurityStrategy) Authenticate() hodor.HandlerFunc {
 				}
 				http.SetCookie(ctx.Writer, cookie)
 				// redirect to succcess page
-				http.Redirect(ctx.Writer, ctx.Request, ls.successRedirect, http.StatusOK)
+				if len(ls.successRedirect) > 0 {
+					ctx.Redirect(ls.successRedirect)
+				} else {
+					ctx.SendStatus(http.StatusOK)
+				}
 				return
 			}
 		}
 
 		// redirect to error page
-		http.Redirect(ctx.Writer, ctx.Request, ls.failureRedirect, http.StatusOK)
+		if len(ls.failureRedirect) > 0 {
+			ctx.Redirect(ls.failureRedirect)
+		} else {
+			ctx.SendStatus(http.StatusBadRequest)
+		}
 	}
 }
 

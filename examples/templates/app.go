@@ -1,4 +1,4 @@
-package main
+/*package main
 
 import (
 	"github.com/mbrlabs/hodor"
@@ -21,3 +21,4 @@ func main() {
 
 	app.Start()
 }
+*/
