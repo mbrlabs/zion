@@ -109,6 +109,7 @@ type LocalSecurityMiddleware struct {
 	userStore    UserStore
 	sessionStore SessionStore
 	rules        SecurityRules
+	redirect     string
 }
 
 func NewLocalSecurityMiddleware(userStore UserStore, sessionStore SessionStore) *LocalSecurityMiddleware {
@@ -126,8 +127,20 @@ func (ls *LocalSecurityMiddleware) SetSessionStore(store SessionStore) {
 	ls.sessionStore = store
 }
 
+func (ls *LocalSecurityMiddleware) SetRedirect(path string) {
+	ls.redirect = path
+}
+
 func (ls *LocalSecurityMiddleware) AddRule(rule SecurityRule) {
 	ls.rules = append(ls.rules, rule)
+}
+
+func (sm *LocalSecurityMiddleware) redirectOnAuthFailed(ctx *hodor.Context) {
+	if len(sm.redirect) == 0 {
+		ctx.SendStatus(http.StatusForbidden)
+	} else {
+		ctx.Redirect(sm.redirect)
+	}
 }
 
 func (sm *LocalSecurityMiddleware) Execute(ctx *hodor.Context) bool {
@@ -138,7 +151,7 @@ func (sm *LocalSecurityMiddleware) Execute(ctx *hodor.Context) bool {
 			return true
 		}
 		fmt.Println("User with no cookie set tries to acacess restricted page")
-		http.NotFound(ctx.Writer, ctx.Request)
+		sm.redirectOnAuthFailed(ctx)
 		return false
 	}
 
@@ -161,7 +174,7 @@ func (sm *LocalSecurityMiddleware) Execute(ctx *hodor.Context) bool {
 		return true
 	}
 
-	http.NotFound(ctx.Writer, ctx.Request)
+	sm.redirectOnAuthFailed(ctx)
 	return false
 }
 

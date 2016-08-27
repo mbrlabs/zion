@@ -42,3 +42,11 @@ func NewContext(h *Hodor, w http.ResponseWriter, r *http.Request) *Context {
 func (ctx *Context) Render(name string, data interface{}) {
 	ctx.hodor.templateEngine.Render(name, data, ctx.Writer)
 }
+
+func (ctx *Context) SendStatus(status int) {
+	ctx.Writer.WriteHeader(status)
+}
+
+func (ctx *Context) Redirect(path string) {
+	http.Redirect(ctx.Writer, ctx.Request, path, http.StatusTemporaryRedirect)
+}
