@@ -17,6 +17,7 @@ package hodor
 import (
 	"fmt"
 	"net/http"
+	"runtime/debug"
 	"strings"
 )
 
@@ -79,7 +80,19 @@ func (r *Router) addRoute(pattern string, method string, handler HandlerFunc) {
 	r.tree.insertRoute(newRoute(pattern, method, handler))
 }
 
-func (r *Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (r *Router) recover(resp http.ResponseWriter, req *http.Request) {
+	if obj := recover(); obj != nil {
+		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", string(debug.Stack()[:]))
+	}
+
+	// TODO send depending on dev mode a detailed message.
+	// also make it possible to define a custom page in case of a panic recovery.
+
+	// send internal server error
+	resp.WriteHeader(http.StatusInternalServerError)
+}
+
+func (r *Router) serve(resp http.ResponseWriter, req *http.Request) {
 	ctx := NewContext(r.hodor, resp, req)
 	route := r.tree.get(ctx)
 
@@ -102,4 +115,9 @@ func (r *Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			}
 		}
 	}
+}
+
+func (r *Router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	defer r.recover(resp, req)
+	r.serve(resp, req)
 }

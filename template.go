@@ -15,7 +15,6 @@
 package hodor
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -51,7 +50,6 @@ func (eng *goTemplateEngine) CompileTemplates(templatePath string) error {
 	var tmplList []string
 	var err error
 	filepath.Walk(templatePath, func(path string, info os.FileInfo, ínternalError error) error {
-		fmt.Println(path)
 		if ínternalError != nil {
 			err = ínternalError
 		} else {

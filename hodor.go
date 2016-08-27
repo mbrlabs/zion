@@ -126,7 +126,7 @@ func (h *Hodor) prepare() {
 func (h *Hodor) Start() {
 	h.checkConfig()
 	h.prepare()
-	fmt.Println("Listening on http://localhost:3000")
+	fmt.Println("Listening on http://" + h.config.Host + ":" + strconv.Itoa(h.config.Port))
 
 	h.server.ListenAndServe()
 }
