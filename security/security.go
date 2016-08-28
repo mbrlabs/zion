@@ -22,6 +22,7 @@ import (
 
 type SecurityStrategy interface {
 	Authenticate() hodor.HandlerFunc
+	Logout() hodor.HandlerFunc
 }
 
 type SecurityRule struct {

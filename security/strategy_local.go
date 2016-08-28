@@ -29,6 +29,7 @@ type LocalSecurityStrategy struct {
 	sessionStore    SessionStore
 	successRedirect string
 	failureRedirect string
+	logoutRedirect  string
 	loginNameField  string
 	passwordField   string
 }
@@ -48,9 +49,10 @@ func (ls *LocalSecurityStrategy) SetSessionStore(store SessionStore) {
 	ls.sessionStore = store
 }
 
-func (ls *LocalSecurityStrategy) SetRedirects(successRedirect string, failureRedirect string) {
+func (ls *LocalSecurityStrategy) SetRedirects(successRedirect string, failureRedirect string, logoutRedirect string) {
 	ls.failureRedirect = failureRedirect
 	ls.successRedirect = successRedirect
+	ls.logoutRedirect = logoutRedirect
 }
 
 func (ls *LocalSecurityStrategy) SetPostParameterFields(loginNameField string, passwordField string) {
@@ -104,6 +106,19 @@ func (ls *LocalSecurityStrategy) Authenticate() hodor.HandlerFunc {
 			ctx.Redirect(ls.failureRedirect)
 		} else {
 			ctx.SendStatus(http.StatusBadRequest)
+		}
+	}
+}
+
+func (ls *LocalSecurityStrategy) Logout() hodor.HandlerFunc {
+	return func(ctx *hodor.Context) {
+		cookie, err := ctx.Request.Cookie(sessionCookieName)
+		if ctx.User != nil && err == nil {
+			session := ls.sessionStore.Find(cookie.Value)
+			if session != nil {
+				ls.sessionStore.Delete(session)
+				ctx.Redirect(ls.logoutRedirect)
+			}
 		}
 	}
 }
