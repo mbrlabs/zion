@@ -16,13 +16,13 @@ package security
 
 import (
 	"fmt"
-	"github.com/mbrlabs/hodor"
+	"github.com/mbrlabs/zion"
 	"strings"
 )
 
 type SecurityStrategy interface {
-	Authenticate() hodor.HandlerFunc
-	Logout() hodor.HandlerFunc
+	Authenticate() zion.HandlerFunc
+	Logout() zion.HandlerFunc
 }
 
 type SecurityRule struct {
@@ -56,7 +56,7 @@ func NewSecurityRule(pattern string, httpMethods []string, userRoles []string) S
 	}
 }
 
-func (r SecurityRules) IsAllowed(user hodor.User, ctx *hodor.Context) bool {
+func (r SecurityRules) IsAllowed(user zion.User, ctx *zion.Context) bool {
 	for _, rule := range r {
 		if rule.doesPatternMatch(ctx) {
 			// if the user is nil and this route is protected, return false
@@ -85,7 +85,7 @@ func (r SecurityRules) IsAllowed(user hodor.User, ctx *hodor.Context) bool {
 }
 
 // TODO implement
-func (r *SecurityRule) doesPatternMatch(ctx *hodor.Context) bool {
+func (r *SecurityRule) doesPatternMatch(ctx *zion.Context) bool {
 	parts := strings.Split(strings.Trim(ctx.Request.URL.Path, "/"), "/")
 	partsLen := len(parts)
 	partsLastIndex := partsLen - 1
@@ -116,6 +116,6 @@ func (r *SecurityRule) doesPatternMatch(ctx *hodor.Context) bool {
 }
 
 type SecurityMiddleware interface {
-	hodor.Middleware
+	zion.Middleware
 	AddRule(rule SecurityRule)
 }

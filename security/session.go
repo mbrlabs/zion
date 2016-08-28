@@ -15,14 +15,14 @@
 package security
 
 import (
-	"github.com/mbrlabs/hodor"
+	"github.com/mbrlabs/zion"
 	"time"
 )
 
 const (
 	sessionExpire     = 24 * 3 * time.Hour
 	sessionLength     = 120
-	sessionCookieName = "hsession"
+	sessionCookieName = "zsession"
 	sessionAlphabet   = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
@@ -33,9 +33,9 @@ type Session struct {
 	Expire time.Time
 }
 
-func NewSession(user hodor.User) *Session {
+func NewSession(user zion.User) *Session {
 	return &Session{
-		ID:     hodor.GenerateRandomString(sessionLength, sessionAlphabet),
+		ID:     zion.GenerateRandomString(sessionLength, sessionAlphabet),
 		UserID: user.GetID(),
 		Expire: time.Now().Add(sessionExpire),
 	}

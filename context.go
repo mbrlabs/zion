@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hodor
+package zion
 
 import (
 	"encoding/json"
@@ -22,7 +22,7 @@ import (
 
 // Context #TODO
 type Context struct {
-	hodor *Hodor
+	zion *Zion
 
 	Writer    http.ResponseWriter
 	Request   *http.Request
@@ -31,9 +31,9 @@ type Context struct {
 }
 
 // NewContext #TODO
-func NewContext(h *Hodor, w http.ResponseWriter, r *http.Request) *Context {
+func NewContext(z *Zion, w http.ResponseWriter, r *http.Request) *Context {
 	return &Context{
-		hodor:     h,
+		zion:      z,
 		Writer:    w,
 		Request:   r,
 		URLParams: make(map[string]string),
@@ -42,7 +42,7 @@ func NewContext(h *Hodor, w http.ResponseWriter, r *http.Request) *Context {
 
 // Render #TODO
 func (ctx *Context) Render(name string, data interface{}) {
-	ctx.hodor.config.TemplateEngine.Render(name, data, ctx.Writer)
+	ctx.zion.config.TemplateEngine.Render(name, data, ctx.Writer)
 }
 
 func (ctx *Context) Json(data interface{}) {

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package hodor
+package zion
 
 import (
 	"fmt"
@@ -70,12 +70,12 @@ type router struct {
 	after  []Middleware
 	before []Middleware
 
-	hodor *Hodor
+	zion *Zion
 }
 
 // NewRouter #TODO
-func newRouter(hodor *Hodor) *router {
-	return &router{hodor: hodor, tree: newRouteTree()}
+func newRouter(zion *Zion) *router {
+	return &router{zion: zion, tree: newRouteTree()}
 }
 
 func (r *router) mountAfter(pattern string, middleware Middleware) {
@@ -96,7 +96,7 @@ func (r *router) recover(w http.ResponseWriter, req *http.Request) {
 	if obj := recover(); obj != nil {
 		stacktrace := string(debug.Stack()[:])
 		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", stacktrace)
-		if r.hodor.config.DevelopmentMode {
+		if r.zion.config.DevelopmentMode {
 			fmt.Fprintf(w, serverErrorPageDevelopment, escapeHTML(stacktrace))
 		} else {
 			fmt.Fprintf(w, serverErrorPageProduction)
@@ -105,13 +105,13 @@ func (r *router) recover(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *router) serve(resp http.ResponseWriter, req *http.Request) {
-	ctx := NewContext(r.hodor, resp, req)
+	ctx := NewContext(r.zion, resp, req)
 	route := r.tree.get(ctx)
 
 	if route == nil {
 		// we didn't find a handler -> send a 404 or redirect to error page
-		if len(r.hodor.config.PageNotFoundRedirect) > 0 {
-			ctx.Redirect(r.hodor.config.PageNotFoundRedirect)
+		if len(r.zion.config.PageNotFoundRedirect) > 0 {
+			ctx.Redirect(r.zion.config.PageNotFoundRedirect)
 		} else {
 			http.NotFound(resp, req)
 		}

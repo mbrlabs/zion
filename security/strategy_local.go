@@ -16,7 +16,7 @@ package security
 
 import (
 	"fmt"
-	"github.com/mbrlabs/hodor"
+	"github.com/mbrlabs/zion"
 	"net/http"
 )
 
@@ -60,8 +60,8 @@ func (ls *LocalSecurityStrategy) SetPostParameterFields(loginNameField string, p
 	ls.passwordField = passwordField
 }
 
-func (ls *LocalSecurityStrategy) Authenticate() hodor.HandlerFunc {
-	return func(ctx *hodor.Context) {
+func (ls *LocalSecurityStrategy) Authenticate() zion.HandlerFunc {
+	return func(ctx *zion.Context) {
 		login := ctx.Request.FormValue(ls.loginNameField)
 		password := ctx.Request.FormValue(ls.passwordField)
 
@@ -110,8 +110,8 @@ func (ls *LocalSecurityStrategy) Authenticate() hodor.HandlerFunc {
 	}
 }
 
-func (ls *LocalSecurityStrategy) Logout() hodor.HandlerFunc {
-	return func(ctx *hodor.Context) {
+func (ls *LocalSecurityStrategy) Logout() zion.HandlerFunc {
+	return func(ctx *zion.Context) {
 		cookie, err := ctx.Request.Cookie(sessionCookieName)
 		if ctx.User != nil && err == nil {
 			session := ls.sessionStore.Find(cookie.Value)
@@ -158,7 +158,7 @@ func (ls *LocalSecurityMiddleware) AddRule(rule SecurityRule) {
 	ls.rules = append(ls.rules, rule)
 }
 
-func (sm *LocalSecurityMiddleware) redirectOnAuthFailed(ctx *hodor.Context) {
+func (sm *LocalSecurityMiddleware) redirectOnAuthFailed(ctx *zion.Context) {
 	if len(sm.redirect) == 0 {
 		ctx.SendStatus(http.StatusForbidden)
 	} else {
@@ -166,7 +166,7 @@ func (sm *LocalSecurityMiddleware) redirectOnAuthFailed(ctx *hodor.Context) {
 	}
 }
 
-func (sm *LocalSecurityMiddleware) Execute(ctx *hodor.Context) bool {
+func (sm *LocalSecurityMiddleware) Execute(ctx *zion.Context) bool {
 	// get cookie from request header
 	cookie, err := ctx.Request.Cookie(sessionCookieName)
 	if err != nil {
@@ -180,7 +180,7 @@ func (sm *LocalSecurityMiddleware) Execute(ctx *hodor.Context) bool {
 
 	// get session based on session key in cookie
 	session := sm.sessionStore.Find(cookie.Value)
-	var user hodor.User
+	var user zion.User
 
 	// get user by userID stored in session
 	if session != nil {
