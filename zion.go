@@ -19,16 +19,57 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
-// Zion #TODO
+// Config
+//------------------------------------------------------------------------------------
+
+// Config is used to configure zion
+type Config struct {
+	Host         string
+	Port         int
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+
+	TemplatePath   string
+	TemplateEngine HTMLTemplateEngine
+
+	StaticFilePath       string
+	StaticFileURLPattern string
+
+	PageNotFoundRedirect string
+	ServerErrorRedirect  string
+
+	DevelopmentMode bool
+}
+
+// NewConfig returns a new config with ready to use default values
+func NewConfig() *Config {
+	return &Config{
+		Host:                 "localhost",
+		Port:                 3000,
+		ReadTimeout:          10 * time.Second,
+		WriteTimeout:         10 * time.Second,
+		TemplatePath:         "views/",
+		TemplateEngine:       NewDefaultTemplateEngine(),
+		StaticFilePath:       "static/",
+		StaticFileURLPattern: "/static/*",
+		DevelopmentMode:      true,
+	}
+}
+
+// Zion
+//------------------------------------------------------------------------------------
+
+// Zion is holds everythin together
 type Zion struct {
 	server http.Server
 	router *router
 	config *Config
 }
 
-// New #TODO
+// New returns a new zion instance
 func New(config *Config) *Zion {
 	app := &Zion{config: config}
 	app.router = newRouter(app)
@@ -36,47 +77,49 @@ func New(config *Config) *Zion {
 	return app
 }
 
-// MountAfter #TODO
+// MountAfter mounts middleware after the handler functions
 func (z *Zion) MountAfter(pattern string, middleware Middleware) {
 	z.router.mountAfter(pattern, middleware)
 }
 
-// MountBefore #TODO
+// MountBefore mounts middleware before the handler functions
 func (z *Zion) MountBefore(pattern string, middleware Middleware) {
 	z.router.mountBefore(pattern, middleware)
 }
 
-// Get #TODO
+// Get registers the handler with the given url pattern for GET requests
 func (z *Zion) Get(pattern string, handler HandlerFunc) {
 	z.router.addRoute(pattern, http.MethodGet, handler)
 }
 
-// Head #TODO
+// Head registers the handler with the given url pattern for HEAD requests
 func (z *Zion) Head(pattern string, handler HandlerFunc) {
 	z.router.addRoute(pattern, http.MethodHead, handler)
 }
 
-// Post #TODO
+// Post registers the handler with the given url pattern for POST requests
 func (z *Zion) Post(pattern string, handler HandlerFunc) {
 	z.router.addRoute(pattern, http.MethodPost, handler)
 }
 
-// Put #TODO
+// Put registers the handler with the given url pattern for PUT requests
 func (z *Zion) Put(pattern string, handler HandlerFunc) {
 	z.router.addRoute(pattern, http.MethodPut, handler)
 }
 
-// Delete #TODO
+// Delete registers the handler with the given url pattern for DELETE requests
 func (z *Zion) Delete(pattern string, handler HandlerFunc) {
 	z.router.addRoute(pattern, http.MethodDelete, handler)
 }
 
-// Options #TODO
+// Options registers the handler with the given url pattern for OPTIONS requests
 func (z *Zion) Options(pattern string, handler HandlerFunc) {
 	z.router.addRoute(pattern, http.MethodOptions, handler)
 }
 
-// ServeStaticFiles #TODO
+// ServeStaticFiles sets up a file server.
+// urlPath is the path users can access the resources, fsPath is the path on the local filesystem
+// to the files.
 func (z *Zion) ServeStaticFiles(urlPath string, fsPath string) {
 	staticPrefix := strings.Trim(urlPath, "/")
 	if strings.HasSuffix(staticPrefix, "*") {

@@ -16,12 +16,18 @@ package security
 
 import "github.com/mbrlabs/zion"
 
+// UserStore
+//------------------------------------------------------------------------------------
+
 // UserStore #
 type UserStore interface {
 	GetUserByLogin(string) (zion.User, error)
 	GetUserByID(string) (zion.User, error)
 	Authenticate(zion.User, string) bool
 }
+
+// MemoryUserStore
+//------------------------------------------------------------------------------------
 
 type MemoryUserStore struct {
 	loginToUser map[string]zion.User

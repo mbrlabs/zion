@@ -14,7 +14,7 @@
 
 package zion
 
-// User #
+// User is used for authentication & authorization. See the security package.
 type User interface {
 	GetID() string
 	GetLogin() string

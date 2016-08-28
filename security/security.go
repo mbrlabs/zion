@@ -20,16 +20,56 @@ import (
 	"strings"
 )
 
+// SecurityStrategy
+//------------------------------------------------------------------------------------
+
 type SecurityStrategy interface {
 	Authenticate() zion.HandlerFunc
 	Logout() zion.HandlerFunc
 }
+
+// SecurityRule
+//------------------------------------------------------------------------------------
 
 type SecurityRule struct {
 	pattern            []string
 	allowedHTTPMethods map[string]bool
 	userRoles          []string
 }
+
+// TODO implement
+func (r *SecurityRule) doesPatternMatch(ctx *zion.Context) bool {
+	parts := strings.Split(strings.Trim(ctx.Request.URL.Path, "/"), "/")
+	partsLen := len(parts)
+	partsLastIndex := partsLen - 1
+
+	// return true if path does not match
+	for i, patternPart := range r.pattern {
+		if i >= partsLen {
+			return false
+		}
+
+		pathPart := parts[i]
+		if strings.HasPrefix(patternPart, "*") {
+			// wildcard matches the whole rest of the path => break loop & check rest of rule
+			return true
+		} else if strings.HasPrefix(patternPart, ":") || pathPart == patternPart {
+			// if last part is reached we have a match
+			if partsLastIndex == i {
+				return true
+			}
+			// otherwise continue with next part
+			continue
+		} else {
+			return false
+		}
+	}
+
+	return false
+}
+
+// SecurityRules
+//------------------------------------------------------------------------------------
 
 type SecurityRules []SecurityRule
 
@@ -84,36 +124,8 @@ func (r SecurityRules) IsAllowed(user zion.User, ctx *zion.Context) bool {
 	return true
 }
 
-// TODO implement
-func (r *SecurityRule) doesPatternMatch(ctx *zion.Context) bool {
-	parts := strings.Split(strings.Trim(ctx.Request.URL.Path, "/"), "/")
-	partsLen := len(parts)
-	partsLastIndex := partsLen - 1
-
-	// return true if path does not match
-	for i, patternPart := range r.pattern {
-		if i >= partsLen {
-			return false
-		}
-
-		pathPart := parts[i]
-		if strings.HasPrefix(patternPart, "*") {
-			// wildcard matches the whole rest of the path => break loop & check rest of rule
-			return true
-		} else if strings.HasPrefix(patternPart, ":") || pathPart == patternPart {
-			// if last part is reached we have a match
-			if partsLastIndex == i {
-				return true
-			}
-			// otherwise continue with next part
-			continue
-		} else {
-			return false
-		}
-	}
-
-	return false
-}
+// SecurityMiddleware
+//------------------------------------------------------------------------------------
 
 type SecurityMiddleware interface {
 	zion.Middleware

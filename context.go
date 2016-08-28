@@ -20,6 +20,9 @@ import (
 	"net/http"
 )
 
+// Context
+//------------------------------------------------------------------------------------
+
 // Context #TODO
 type Context struct {
 	zion *Zion

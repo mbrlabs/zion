@@ -21,6 +21,9 @@ import (
 	"path/filepath"
 )
 
+// HTMLTemplateEngine
+//------------------------------------------------------------------------------------
+
 // HTMLTemplateEngine #TODO
 type HTMLTemplateEngine interface {
 	EnableRecompiling(enable bool)
@@ -28,9 +31,8 @@ type HTMLTemplateEngine interface {
 	Render(name string, data interface{}, w http.ResponseWriter)
 }
 
-// ============================================================================
-// 					Default html template engine (html/template)
-// ============================================================================
+// goTemplateEngine
+//------------------------------------------------------------------------------------
 
 type goTemplateEngine struct {
 	templatePath       string

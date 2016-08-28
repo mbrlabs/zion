@@ -20,9 +20,8 @@ import (
 	"net/http"
 )
 
-// ============================================================================
-// 						    Local security strategy
-// ============================================================================
+// LocalSecurityStrategy
+//------------------------------------------------------------------------------------
 
 type LocalSecurityStrategy struct {
 	userStore       UserStore
@@ -123,9 +122,8 @@ func (ls *LocalSecurityStrategy) Logout() zion.HandlerFunc {
 	}
 }
 
-// ============================================================================
-// 						    Local security middleware
-// ============================================================================
+// LocalSecurityMiddleware
+//------------------------------------------------------------------------------------
 
 // LocalSecurityMiddleware #
 type LocalSecurityMiddleware struct {

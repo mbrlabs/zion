@@ -21,6 +21,7 @@ import (
 	"strings"
 )
 
+// GenerateRandomString generates a random string
 func GenerateRandomString(length int, alpabet string) string {
 	alpabetLen := byte(len(alpabet))
 
@@ -36,6 +37,7 @@ func GenerateRandomString(length int, alpabet string) string {
 	return string(id)
 }
 
+// HashSha512 is a convenience function for hashing a string using sha512
 func HashSha512(str string, salt string) string {
 	hasher := sha512.New()
 	hasher.Write([]byte(salt + str))

@@ -26,6 +26,9 @@ const (
 	sessionAlphabet   = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
+// Session
+//------------------------------------------------------------------------------------
+
 // Session #TODO
 type Session struct {
 	ID     string
@@ -41,9 +44,8 @@ func NewSession(user zion.User) *Session {
 	}
 }
 
-// ============================================================================
-// 					interface SessionStore & MemorySessionStore
-// ============================================================================
+// SessionStore
+//------------------------------------------------------------------------------------
 
 // SessionStore #
 type SessionStore interface {
@@ -51,6 +53,9 @@ type SessionStore interface {
 	Save(*Session) error
 	Delete(*Session) error
 }
+
+// MemorySessionStore
+//------------------------------------------------------------------------------------
 
 type MemorySessionStore struct {
 	sessions map[string]*Session
