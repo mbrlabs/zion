@@ -15,6 +15,8 @@
 package hodor
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -41,6 +43,15 @@ func NewContext(h *Hodor, w http.ResponseWriter, r *http.Request) *Context {
 // Render #TODO
 func (ctx *Context) Render(name string, data interface{}) {
 	ctx.hodor.config.TemplateEngine.Render(name, data, ctx.Writer)
+}
+
+func (ctx *Context) Json(data interface{}) {
+	data, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("[ERROR] " + err.Error())
+	}
+	ctx.Writer.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(ctx.Writer, "%s", data)
 }
 
 func (ctx *Context) SendStatus(status int) {

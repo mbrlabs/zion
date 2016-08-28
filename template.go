@@ -60,6 +60,11 @@ func (eng *goTemplateEngine) CompileTemplates(templatePath string) error {
 		return nil
 	})
 
+	// return if there is nothing no compile
+	if len(tmplList) == 0 {
+		return nil
+	}
+
 	// compile templates
 	templates, err := template.ParseFiles(tmplList...)
 	if err != nil {
