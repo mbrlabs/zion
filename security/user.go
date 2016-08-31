@@ -14,46 +14,58 @@
 
 package security
 
-import "github.com/mbrlabs/zion"
+// User is used for authentication & authorization. See the security package.
+type User interface {
+	GetID() string
+	GetLogin() string
+	SetLogin(string)
+	GetEmail() string
+	SetEmail(string)
+	GetPassword() string
+	SetPassword(string)
+
+	GetRoles() []string
+	AddRole(string)
+}
 
 // UserStore
 //------------------------------------------------------------------------------------
 
 // UserStore #
 type UserStore interface {
-	GetUserByLogin(string) (zion.User, error)
-	GetUserByID(string) (zion.User, error)
-	Authenticate(zion.User, string) bool
+	GetUserByLogin(string) (User, error)
+	GetUserByID(string) (User, error)
+	Authenticate(User, string) bool
 }
 
 // MemoryUserStore
 //------------------------------------------------------------------------------------
 
 type MemoryUserStore struct {
-	loginToUser map[string]zion.User
-	idToUser    map[string]zion.User
+	loginToUser map[string]User
+	idToUser    map[string]User
 }
 
 func NewMemoryUserStore() *MemoryUserStore {
 	return &MemoryUserStore{
-		loginToUser: make(map[string]zion.User),
-		idToUser:    make(map[string]zion.User),
+		loginToUser: make(map[string]User),
+		idToUser:    make(map[string]User),
 	}
 }
 
-func (us *MemoryUserStore) GetUserByLogin(login string) (zion.User, error) {
+func (us *MemoryUserStore) GetUserByLogin(login string) (User, error) {
 	return us.loginToUser[login], nil
 }
 
-func (us *MemoryUserStore) GetUserByID(id string) (zion.User, error) {
+func (us *MemoryUserStore) GetUserByID(id string) (User, error) {
 	return us.idToUser[id], nil
 }
 
-func (us *MemoryUserStore) AddUser(user zion.User) {
+func (us *MemoryUserStore) AddUser(user User) {
 	us.loginToUser[user.GetLogin()] = user
 	us.idToUser[user.GetID()] = user
 }
 
-func (us *MemoryUserStore) Authenticate(user zion.User, password string) bool {
+func (us *MemoryUserStore) Authenticate(user User, password string) bool {
 	return user.GetPassword() == password
 }

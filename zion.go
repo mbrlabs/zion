@@ -17,9 +17,15 @@ package zion
 import (
 	"fmt"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 	"time"
+)
+
+const (
+	HTTPStandard = "net/http"
+	HTTPFast     = "valyala/fasthttp"
 )
 
 // Config
@@ -27,10 +33,11 @@ import (
 
 // Config is used to configure zion
 type Config struct {
-	Host         string
-	Port         int
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
+	HTTPImplementation string
+	Host               string
+	Port               int
+	ReadTimeout        time.Duration
+	WriteTimeout       time.Duration
 
 	TemplatePath   string
 	TemplateEngine HTMLTemplateEngine
@@ -54,8 +61,9 @@ func NewConfig() *Config {
 		TemplatePath:         "views/",
 		TemplateEngine:       NewDefaultTemplateEngine(),
 		StaticFilePath:       "static/",
-		StaticFileURLPattern: "/static/*",
+		StaticFileURLPattern: "/static/",
 		DevelopmentMode:      true,
+		HTTPImplementation:   HTTPStandard,
 	}
 }
 
@@ -117,23 +125,12 @@ func (z *Zion) Options(pattern string, handler HandlerFunc) {
 	z.router.addRoute(pattern, http.MethodOptions, handler)
 }
 
-// ServeStaticFiles sets up a file server.
-// urlPath is the path users can access the resources, fsPath is the path on the local filesystem
-// to the files.
-func (z *Zion) ServeStaticFiles(urlPath string, fsPath string) {
-	staticPrefix := strings.Trim(urlPath, "/")
-	if strings.HasSuffix(staticPrefix, "*") {
-		staticPrefix = strings.TrimRight(staticPrefix, "*")
-		staticPrefix = "/" + strings.Trim(staticPrefix, "/") + "/"
-
-		// Server files
-		fileServer := http.StripPrefix(staticPrefix, http.FileServer(http.Dir(fsPath)))
-		z.Get(urlPath, func(ctx *Context) {
-			fileServer.ServeHTTP(ctx.Writer, ctx.Request)
-		})
-	} else {
-		panic("Static files must be mapped with a wildcard (*) in the pattern url")
-	}
+// ServeStaticFiles serves static files
+func (z *Zion) ServeStaticFiles(urPrefix string, fsPath string) {
+	pattern := strings.Trim(urPrefix, "/") + "/*file"
+	z.Get(pattern, func(ctx Context) {
+		ctx.File(path.Join(fsPath, ctx.URLParams()["file"]))
+	})
 }
 
 func (z *Zion) checkConfig() {

@@ -14,53 +14,26 @@
 
 package zion
 
-import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-)
-
 // Context
 //------------------------------------------------------------------------------------
 
 // Context #TODO
-type Context struct {
-	zion *Zion
+type Context interface {
+	Render(name string, data interface{})
+	Html(html string)
+	Json(data interface{})
+	File(path string)
+	SendStatus(status int)
+	Redirect(path string)
+	Method() string
+	Path() string
+	URLParams() map[string]string
+	URLParam(name string) string
+	FormValue(name string) string
 
-	Writer    http.ResponseWriter
-	Request   *http.Request
-	URLParams map[string]string
-	User      User
-}
+	Cookie(name string) (*Cookie, error)
+	SetCookie(*Cookie)
 
-// NewContext #TODO
-func NewContext(z *Zion, w http.ResponseWriter, r *http.Request) *Context {
-	return &Context{
-		zion:      z,
-		Writer:    w,
-		Request:   r,
-		URLParams: make(map[string]string),
-	}
-}
-
-// Render #TODO
-func (ctx *Context) Render(name string, data interface{}) {
-	ctx.zion.config.TemplateEngine.Render(name, data, ctx.Writer)
-}
-
-func (ctx *Context) Json(data interface{}) {
-	data, err := json.Marshal(data)
-	if err != nil {
-		fmt.Println("[ERROR] " + err.Error())
-	}
-	ctx.Writer.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(ctx.Writer, "%s", data)
-}
-
-func (ctx *Context) SendStatus(status int) {
-	ctx.Writer.WriteHeader(status)
-}
-
-func (ctx *Context) Redirect(path string) {
-	http.Redirect(ctx.Writer, ctx.Request, path, http.StatusTemporaryRedirect)
+	Extra(string) interface{}
+	AddExtra(string, interface{})
 }

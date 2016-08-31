@@ -16,6 +16,6 @@ package zion
 
 // Middleware #TODO
 type Middleware interface {
-	Execute(ctx *Context) bool
+	Execute(ctx Context) bool
 	Name() string
 }

@@ -36,7 +36,7 @@ type Session struct {
 	Expire time.Time
 }
 
-func NewSession(user zion.User) *Session {
+func NewSession(user User) *Session {
 	return &Session{
 		ID:     zion.GenerateRandomString(sessionLength, sessionAlphabet),
 		UserID: user.GetID(),

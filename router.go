@@ -40,7 +40,7 @@ const (
 //------------------------------------------------------------------------------------
 
 // HandlerFunc #TODO
-type HandlerFunc func(ctx *Context)
+type HandlerFunc func(ctx Context)
 
 // route
 //------------------------------------------------------------------------------------
@@ -97,20 +97,19 @@ func (r *router) addRoute(pattern string, method string, handler HandlerFunc) {
 	r.tree.insertRoute(newRoute(pattern, method, handler))
 }
 
-func (r *router) recover(w http.ResponseWriter, req *http.Request) {
+func (r *router) recover(ctx Context) {
 	if obj := recover(); obj != nil {
 		stacktrace := string(debug.Stack()[:])
 		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", stacktrace)
 		if r.zion.config.DevelopmentMode {
-			fmt.Fprintf(w, serverErrorPageDevelopment, escapeHTML(stacktrace))
+			ctx.Html(fmt.Sprintf(serverErrorPageDevelopment, escapeHTML(stacktrace)))
 		} else {
-			fmt.Fprintf(w, serverErrorPageProduction)
+			ctx.Html(serverErrorPageProduction)
 		}
 	}
 }
 
-func (r *router) serve(resp http.ResponseWriter, req *http.Request) {
-	ctx := NewContext(r.zion, resp, req)
+func (r *router) serve(ctx Context) {
 	route := r.tree.get(ctx)
 
 	if route == nil {
@@ -118,7 +117,7 @@ func (r *router) serve(resp http.ResponseWriter, req *http.Request) {
 		if len(r.zion.config.PageNotFoundRedirect) > 0 {
 			ctx.Redirect(r.zion.config.PageNotFoundRedirect)
 		} else {
-			http.NotFound(resp, req)
+			ctx.Html(pageNotFoundPage)
 		}
 	} else {
 		// before middleware
@@ -127,8 +126,10 @@ func (r *router) serve(resp http.ResponseWriter, req *http.Request) {
 				return
 			}
 		}
+
 		// actual route
 		route.handler(ctx)
+
 		// after middleware
 		for _, mw := range r.after {
 			if !mw.Execute(ctx) {
@@ -139,6 +140,7 @@ func (r *router) serve(resp http.ResponseWriter, req *http.Request) {
 }
 
 func (r *router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	defer r.recover(resp, req)
-	r.serve(resp, req)
+	ctx := newDefaultContext(r.zion, resp, req)
+	defer r.recover(ctx)
+	r.serve(ctx)
 }

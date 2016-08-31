@@ -127,14 +127,14 @@ func (rt *routeTree) insertRoute(r *route) {
 }
 
 // Returns a route and sets the url parameters of the context.
-func (rt *routeTree) get(ctx *Context) *route {
+func (rt *routeTree) get(ctx Context) *route {
 	// get tree root, corresponding to the http method
-	root := rt.treeRoots[ctx.Request.Method]
+	root := rt.treeRoots[ctx.Method()]
 	if root == nil {
 		return nil
 	}
 
-	path := strings.Trim(ctx.Request.URL.Path, "/")
+	path := strings.Trim(ctx.Path(), "/")
 
 	// deny everything that contains a colon or star
 	if strings.Contains(path, ":") || strings.Contains(path, "*") {
@@ -158,7 +158,7 @@ func (rt *routeTree) get(ctx *Context) *route {
 			// found a wildcard match
 			if childNode.isWildcard() {
 				key := strings.TrimLeft(childNode.part, "*")
-				ctx.URLParams[key] = strings.Join(parts[partIndex:], "/")
+				ctx.URLParams()[key] = strings.Join(parts[partIndex:], "/")
 				return childNode.route
 			}
 			// found a static match
@@ -179,7 +179,7 @@ func (rt *routeTree) get(ctx *Context) *route {
 			currentNode = namedParam
 			foundPart = true
 			key := strings.TrimLeft(currentNode.part, ":")
-			ctx.URLParams[key] = part
+			ctx.URLParams()[key] = part
 		}
 
 		// if the url part can't be found, the route does not exist
