@@ -72,23 +72,26 @@ func (ctx *Context) Json(data interface{}) {
 	fmt.Fprintf(ctx.writer, "%s", data)
 }
 
-// TODO this sends the file EVERY request. User Last-Modified instead and send only if file changed.
 func (ctx *Context) File(path string) {
-	fmt.Println("Context: serving file " + path)
-
+	// open file
 	file, err := os.Open(path)
 	defer file.Close()
+
+	// return if file not found
 	if err != nil {
-		ctx.SendStatus(404)
+		ctx.SendStatus(http.StatusNotFound)
 		return
 	}
 
-	stats, _ := file.Stat()
-	ctx.writer.Header().Set("Content-Disposition", "attachment; filename="+file.Name())
-	ctx.writer.Header().Set("Content-Type", mime.TypeByExtension(path))
-	ctx.writer.Header().Set("Content-Length", strconv.FormatInt(stats.Size(), 10))
+	// return if file info cound not be read
+	fileInfo, err := file.Stat()
+	if err != nil {
+		ctx.SendStatus(http.StatusNotFound)
+		return
+	}
 
-	io.Copy(ctx.writer, file)
+	// serve file. this also considers Last-Modified/If-Modified-Since
+	http.ServeContent(ctx.writer, ctx.request, fileInfo.Name(), fileInfo.ModTime(), file)
 }
 
 func (ctx *Context) SendStatus(status int) {
@@ -101,6 +104,14 @@ func (ctx *Context) Redirect(path string) {
 
 func (ctx *Context) Method() string {
 	return ctx.request.Method
+}
+
+func (ctx *Context) RequestHeader() http.Header {
+	return ctx.request.Header
+}
+
+func (ctx *Context) ResponseHeader() http.Header {
+	return ctx.writer.Header()
 }
 
 func (ctx *Context) Path() string {
