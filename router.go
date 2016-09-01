@@ -40,7 +40,7 @@ const (
 //------------------------------------------------------------------------------------
 
 // HandlerFunc #TODO
-type HandlerFunc func(ctx Context)
+type HandlerFunc func(ctx *Context)
 
 // route
 //------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ func (r *router) addRoute(pattern string, method string, handler HandlerFunc) {
 	r.tree.insertRoute(newRoute(pattern, method, handler))
 }
 
-func (r *router) recover(ctx Context) {
+func (r *router) recover(ctx *Context) {
 	if obj := recover(); obj != nil {
 		stacktrace := string(debug.Stack()[:])
 		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", stacktrace)
@@ -109,7 +109,7 @@ func (r *router) recover(ctx Context) {
 	}
 }
 
-func (r *router) serve(ctx Context) {
+func (r *router) serve(ctx *Context) {
 	route := r.tree.get(ctx)
 
 	if route == nil {
@@ -140,7 +140,7 @@ func (r *router) serve(ctx Context) {
 }
 
 func (r *router) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	ctx := newDefaultContext(r.zion, resp, req)
+	ctx := NewContext(r.zion, resp, req)
 	defer r.recover(ctx)
 	r.serve(ctx)
 }

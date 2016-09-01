@@ -127,7 +127,7 @@ func (rt *routeTree) insertRoute(r *route) {
 }
 
 // Returns a route and sets the url parameters of the context.
-func (rt *routeTree) get(ctx Context) *route {
+func (rt *routeTree) get(ctx *Context) *route {
 	// get tree root, corresponding to the http method
 	root := rt.treeRoots[ctx.Method()]
 	if root == nil {

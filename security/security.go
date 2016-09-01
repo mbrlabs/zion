@@ -38,7 +38,7 @@ type SecurityRule struct {
 }
 
 // TODO implement
-func (r *SecurityRule) doesPatternMatch(ctx zion.Context) bool {
+func (r *SecurityRule) doesPatternMatch(ctx *zion.Context) bool {
 	parts := strings.Split(strings.Trim(ctx.Path(), "/"), "/")
 	partsLen := len(parts)
 	partsLastIndex := partsLen - 1
@@ -96,7 +96,7 @@ func NewSecurityRule(pattern string, httpMethods []string, userRoles []string) S
 	}
 }
 
-func (r SecurityRules) IsAllowed(user User, ctx zion.Context) bool {
+func (r SecurityRules) IsAllowed(user User, ctx *zion.Context) bool {
 	for _, rule := range r {
 		if rule.doesPatternMatch(ctx) {
 			// if the user is nil and this route is protected, return false

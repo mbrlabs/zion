@@ -23,11 +23,6 @@ import (
 	"time"
 )
 
-const (
-	HTTPStandard = "net/http"
-	HTTPFast     = "valyala/fasthttp"
-)
-
 // Config
 //------------------------------------------------------------------------------------
 
@@ -63,7 +58,6 @@ func NewConfig() *Config {
 		StaticFilePath:       "static/",
 		StaticFileURLPattern: "/static/",
 		DevelopmentMode:      true,
-		HTTPImplementation:   HTTPStandard,
 	}
 }
 
@@ -128,7 +122,7 @@ func (z *Zion) Options(pattern string, handler HandlerFunc) {
 // ServeStaticFiles serves static files
 func (z *Zion) ServeStaticFiles(urPrefix string, fsPath string) {
 	pattern := strings.Trim(urPrefix, "/") + "/*file"
-	z.Get(pattern, func(ctx Context) {
+	z.Get(pattern, func(ctx *Context) {
 		ctx.File(path.Join(fsPath, ctx.URLParams()["file"]))
 	})
 }

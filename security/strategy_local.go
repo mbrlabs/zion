@@ -60,7 +60,7 @@ func (ls *LocalSecurityStrategy) SetPostParameterFields(loginNameField string, p
 }
 
 func (ls *LocalSecurityStrategy) Authenticate() zion.HandlerFunc {
-	return func(ctx zion.Context) {
+	return func(ctx *zion.Context) {
 		login := ctx.FormValue(ls.loginNameField)
 		password := ctx.FormValue(ls.passwordField)
 
@@ -84,7 +84,7 @@ func (ls *LocalSecurityStrategy) Authenticate() zion.HandlerFunc {
 			err := ls.sessionStore.Save(session)
 			if err == nil {
 				// set cockie
-				cookie := &zion.Cookie{
+				cookie := &http.Cookie{
 					Name:    sessionCookieName,
 					Value:   session.ID,
 					Expires: session.Expire,
@@ -110,7 +110,7 @@ func (ls *LocalSecurityStrategy) Authenticate() zion.HandlerFunc {
 }
 
 func (ls *LocalSecurityStrategy) Logout() zion.HandlerFunc {
-	return func(ctx zion.Context) {
+	return func(ctx *zion.Context) {
 		cookie, err := ctx.Cookie(sessionCookieName)
 		user, ok := ctx.Extra("user").(User) // TODO make user key a constant
 
@@ -158,7 +158,7 @@ func (ls *LocalSecurityMiddleware) AddRule(rule SecurityRule) {
 	ls.rules = append(ls.rules, rule)
 }
 
-func (sm *LocalSecurityMiddleware) redirectOnAuthFailed(ctx zion.Context) {
+func (sm *LocalSecurityMiddleware) redirectOnAuthFailed(ctx *zion.Context) {
 	if len(sm.redirect) == 0 {
 		ctx.SendStatus(http.StatusForbidden)
 	} else {
@@ -166,7 +166,7 @@ func (sm *LocalSecurityMiddleware) redirectOnAuthFailed(ctx zion.Context) {
 	}
 }
 
-func (sm *LocalSecurityMiddleware) Execute(ctx zion.Context) bool {
+func (sm *LocalSecurityMiddleware) Execute(ctx *zion.Context) bool {
 	// get cookie from request header
 	cookie, err := ctx.Cookie(sessionCookieName)
 	if err != nil {
