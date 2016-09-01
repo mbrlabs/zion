@@ -20,6 +20,19 @@ import (
 	"strings"
 )
 
+// GetUser returns a user from extras of the given context or nil if none found
+func GetUser(ctx *zion.Context) User {
+	extra := ctx.Extra(zion.ExtraUser)
+	if extra != nil {
+		user, ok := extra.(User)
+		if user != nil && ok {
+			return user
+		}
+	}
+
+	return nil
+}
+
 // SecurityStrategy
 //------------------------------------------------------------------------------------
 

@@ -112,9 +112,7 @@ func (ls *LocalSecurityStrategy) Authenticate() zion.HandlerFunc {
 func (ls *LocalSecurityStrategy) Logout() zion.HandlerFunc {
 	return func(ctx *zion.Context) {
 		cookie, err := ctx.Cookie(sessionCookieName)
-		user, ok := ctx.Extra("user").(User) // TODO make user key a constant
-
-		if ok && err == nil && user != nil {
+		if err == nil {
 			session := ls.sessionStore.Find(cookie.Value)
 			if session != nil {
 				ls.sessionStore.Delete(session)
@@ -193,7 +191,7 @@ func (sm *LocalSecurityMiddleware) Execute(ctx *zion.Context) bool {
 
 	// go through all security rules
 	if sm.rules.IsAllowed(user, ctx) {
-		ctx.AddExtra("user", user) // TODO make user key a constant
+		ctx.AddExtra(zion.ExtraUser, user)
 		return true
 	}
 

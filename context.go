@@ -24,6 +24,11 @@ import (
 	"strconv"
 )
 
+// extra keys
+const (
+	ExtraUser = "extra_user"
+)
+
 // Context
 //------------------------------------------------------------------------------------
 
@@ -35,8 +40,7 @@ type Context struct {
 	request *http.Request
 
 	urlParams map[string]string
-
-	extras map[string]interface{}
+	extras    map[string]interface{}
 }
 
 // NewContext #TODO
