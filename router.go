@@ -102,9 +102,9 @@ func (r *router) recover(ctx *Context) {
 		stacktrace := string(debug.Stack()[:])
 		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", stacktrace)
 		if r.zion.config.DevelopmentMode {
-			ctx.Html(fmt.Sprintf(serverErrorPageDevelopment, escapeHTML(stacktrace)))
+			ctx.String(fmt.Sprintf(serverErrorPageDevelopment, escapeHTML(stacktrace)))
 		} else {
-			ctx.Html(serverErrorPageProduction)
+			ctx.String(serverErrorPageProduction)
 		}
 	}
 }
@@ -117,7 +117,7 @@ func (r *router) serve(ctx *Context) {
 		if len(r.zion.config.PageNotFoundRedirect) > 0 {
 			ctx.Redirect(r.zion.config.PageNotFoundRedirect)
 		} else {
-			ctx.Html(pageNotFoundPage)
+			ctx.String(pageNotFoundPage)
 		}
 	} else {
 		// before middleware
