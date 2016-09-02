@@ -15,17 +15,8 @@
 package zion
 
 import (
-	"crypto/sha512"
-	"encoding/base64"
 	"strings"
 )
-
-// HashSha512 is a convenience function for hashing a string using sha512
-func HashSha512(str string, salt string) string {
-	hasher := sha512.New()
-	hasher.Write([]byte(salt + str))
-	return base64.StdEncoding.EncodeToString(hasher.Sum(nil))
-}
 
 func escapeHtmlSpaces(s string) string {
 	new := strings.Replace(s, " ", "&nbsp;", -1)

@@ -15,7 +15,7 @@
 package security
 
 import (
-	"github.com/mbrlabs/gout/strings"
+	"github.com/mbrlabs/gout"
 	"time"
 )
 
@@ -23,7 +23,7 @@ const (
 	sessionExpire     = 24 * 3 * time.Hour
 	sessionLength     = 120
 	sessionCookieName = "zsession"
-	sessionAlphabet   = strings.AlphaNumeric
+	sessionAlphabet   = gout.AlphaNumeric
 )
 
 // Session
@@ -38,7 +38,7 @@ type Session struct {
 
 func NewSession(user User) *Session {
 	return &Session{
-		ID:     strings.RandomString(sessionLength, sessionAlphabet),
+		ID:     gout.RandomString(sessionLength, sessionAlphabet),
 		UserID: user.GetID(),
 		Expire: time.Now().Add(sessionExpire),
 	}
