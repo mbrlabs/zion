@@ -102,7 +102,7 @@ func (r *router) recover(ctx *Context) {
 		stacktrace := string(debug.Stack()[:])
 		fmt.Printf("\n\n[CAPTURED PANIC] ====> \n\n%s\n\n[STACTRACE END] <====\n", stacktrace)
 		if r.zion.config.DevelopmentMode {
-			ctx.String(fmt.Sprintf(serverErrorPageDevelopment, escapeHTML(stacktrace)))
+			ctx.String(fmt.Sprintf(serverErrorPageDevelopment, escapeHtmlSpaces(stacktrace)))
 		} else {
 			ctx.String(serverErrorPageProduction)
 		}

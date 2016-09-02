@@ -15,7 +15,7 @@
 package security
 
 import (
-	"github.com/mbrlabs/zion"
+	"github.com/mbrlabs/gout/strings"
 	"time"
 )
 
@@ -23,7 +23,7 @@ const (
 	sessionExpire     = 24 * 3 * time.Hour
 	sessionLength     = 120
 	sessionCookieName = "zsession"
-	sessionAlphabet   = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	sessionAlphabet   = strings.AlphaNumeric
 )
 
 // Session
@@ -38,7 +38,7 @@ type Session struct {
 
 func NewSession(user User) *Session {
 	return &Session{
-		ID:     zion.GenerateRandomString(sessionLength, sessionAlphabet),
+		ID:     strings.RandomString(sessionLength, sessionAlphabet),
 		UserID: user.GetID(),
 		Expire: time.Now().Add(sessionExpire),
 	}

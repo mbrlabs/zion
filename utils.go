@@ -15,27 +15,10 @@
 package zion
 
 import (
-	"crypto/rand"
 	"crypto/sha512"
 	"encoding/base64"
 	"strings"
 )
-
-// GenerateRandomString generates a random string
-func GenerateRandomString(length int, alpabet string) string {
-	alpabetLen := byte(len(alpabet))
-
-	// make generate random byte array
-	id := make([]byte, length)
-	rand.Read(id)
-
-	// replace rand num with char from alphabet
-	for i, b := range id {
-		id[i] = alpabet[b%alpabetLen]
-	}
-
-	return string(id)
-}
 
 // HashSha512 is a convenience function for hashing a string using sha512
 func HashSha512(str string, salt string) string {
@@ -44,7 +27,7 @@ func HashSha512(str string, salt string) string {
 	return base64.StdEncoding.EncodeToString(hasher.Sum(nil))
 }
 
-func escapeHTML(s string) string {
+func escapeHtmlSpaces(s string) string {
 	new := strings.Replace(s, " ", "&nbsp;", -1)
 	new = strings.Replace(new, "\t", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", -1)
 	new = strings.Replace(new, "\n", "<br>", -1)
