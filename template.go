@@ -80,7 +80,10 @@ func (eng *goTemplateEngine) CompileTemplates(templatePath string) error {
 func (eng *goTemplateEngine) Render(name string, data interface{}, w http.ResponseWriter) {
 	// recompile before render if enabled
 	if eng.recompilingEnabled {
-		eng.CompileTemplates(eng.templatePath)
+		err := eng.CompileTemplates(eng.templatePath)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 	// render
 	eng.templates.ExecuteTemplate(w, name, data)

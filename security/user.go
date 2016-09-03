@@ -24,8 +24,9 @@ type User interface {
 	GetPassword() string
 	SetPassword(string)
 
-	GetRoles() []string
+	GetRoles() map[string]bool
 	AddRole(string)
+	HasRole(string) bool
 }
 
 // UserStore
