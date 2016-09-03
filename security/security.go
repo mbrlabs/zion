@@ -127,8 +127,19 @@ func (r SecurityRules) IsAllowed(user User, ctx *zion.Context) bool {
 			}
 
 			// check user role
+			if len(rule.userRoles) > 0 {
+				hasRight := false
+				for _, role := range rule.userRoles {
+					if user.HasRole(role) {
+						hasRight = true
+						break
+					}
+				}
+				if !hasRight {
+					return false
+				}
+			}
 
-			// TODO check user roles
 			fmt.Println("[SECURITY] passed protected area")
 			return true
 		}
