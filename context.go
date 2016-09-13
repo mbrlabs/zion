@@ -71,6 +71,12 @@ func (ctx *Context) Json(data interface{}) {
 	fmt.Fprintf(ctx.writer, "%s", data)
 }
 
+// RawJson sets the content type & sends the json to the client
+func (ctx *Context) RawJson(json string) {
+	ctx.writer.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(ctx.writer, "%s", json)
+}
+
 // File sends a file to the client. This method implements the If-Modified-Since/Last-Modified headers
 // and sends files only if the client has an older version of the file.
 func (ctx *Context) File(path string) {
